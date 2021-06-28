@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+require('./psbr.js')
