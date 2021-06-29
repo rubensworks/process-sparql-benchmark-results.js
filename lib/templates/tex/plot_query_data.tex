@@ -1,0 +1,86 @@
+\documentclass[preview]{standalone}
+\usepackage[utf8]{inputenc}
+
+
+% Page setup
+\usepackage{amsmath}
+
+% Typography
+\usepackage[scaled]{helvet}
+\let\familydefault\sfdefault
+\usepackage{sansmath}
+\sansmath
+
+\usepackage[usenames,svgnames]{xcolor}
+\usepackage{tikz,pgfplots}
+\usetikzlibrary{arrows,positioning,shapes,calc,intersections,patterns}
+\usepgfplotslibrary{colorbrewer}
+
+\newcommand\plotfontsize{\fontsize{9}{9}\selectfont}
+\pgfplotsset{compat=1.9,
+  axis lines=left,
+  every axis/.append style={
+    font=\plotfontsize,
+  },
+  label style={
+    font=\plotfontsize\bfseries,
+  },
+  tick label style={
+    font=\plotfontsize\bfseries,
+  },
+  xtick style={
+    draw=none,
+  },
+  legend cell align=left,
+  legend style={
+    /tikz/every even column/.append style={column sep=.3em},
+    draw=none, fill=none,
+    inner sep=0pt, outer sep=0pt,
+    anchor=north east,
+    at={(%LEGEND_POS%)},
+    text height=3pt,
+  },
+  log base 10 number format code/.code={%
+    $\pgfmathparse{10^(#1)}\pgfmathprintnumber{\pgfmathresult}$%
+  },
+  cycle list/%COLOR_SCHEME%,
+}
+
+\begin{document}
+\pagestyle{empty}
+
+\newenvironment{resultAxis}{
+\begin{axis}[
+    xtick=data,
+    width=%WIDTH%pt,
+    height=96pt,
+    ymin=0,
+    %Y_MAX%
+    bar width=2.75pt,
+    xbar=.25pt,
+    enlarge x limits={abs=%X_LIMITS%pt},
+    symbolic x coords={%QUERIES%},
+    % Don't show axis exponent
+    ytick scale label code/.code={},
+    scaled y ticks=false,
+    x axis line style={draw=none},
+    % reverse legend,
+    scale only axis,
+    clip=false,
+    axis on top,
+    area legend,
+    ylabel={Duration (s)},
+    cycle list name=%COLOR_SCHEME%,
+    every axis plot/.append style={
+        draw=none,
+        fill,
+    },
+]
+}{\end{axis}}
+\begin{tikzpicture}
+\begin{resultAxis}
+%BARS%
+\legend{%LEGEND%}
+\end{resultAxis}
+\end{tikzpicture}
+\end{document}
