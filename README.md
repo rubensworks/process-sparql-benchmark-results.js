@@ -116,6 +116,70 @@ Options:
                                                       [boolean] [default: false]
 ```
 
+### 2.2. Create CSV files
+
+Subcommands of `psbr csv` can create CSV files.
+
+#### 2.2.1. Summarize query execution times
+
+By invoking `psbr csv query` with any number of experiment directories,
+the `data_all.csv` file will be created.
+
+By default, it will look for the `query-times.csv` file within each experiment directory.
+This file is expected to look as follows:
+```text
+name;id;results;time;timestamps
+interactive-short-4;0;0;4;
+interactive-short-4;1;0;1;
+interactive-short-5;0;0;0;
+interactive-short-5;1;0;0;
+```
+
+Concretely, it will output the `data_all.csv` that looks as follows:
+```csv
+combination;time
+output/combination_0;10963
+output/combination_0;10849
+output/combination_0;11912
+output/combination_1;16320
+output/combination_1;12389
+output/combination_1;11944
+```
+
+You can for example use this data to calculate the statistical different between two combinations in R as follows:
+```R
+data <- read.csv('./data_all.csv', sep = ';')
+
+# Calculate means
+aggregate(data$time, list(data$combination), median)
+
+# Compare means with Kruskal-Wallis test (nonparametric, if non-normal distribution)
+kruskal.test(time ~ combination, data = data[which(data$combination=='output/combination_0' | data$combination=='output/combination_1'),])
+# If p < 0.05, combinations have no difference with a significance of 95%.
+# If p > 0.05, combinations are different with a significance of 95%.
+```
+
+**Full usage**:
+
+```text
+psbr csv query <experiment-dir...>
+
+Summarize all query execution times from the given experiments
+
+Options:
+      --version         Show version number                            [boolean]
+      --cwd             The current working directory      [string] [default: .]
+  -v, --verbose         If more logging output should be generated     [boolean]
+      --help            Show help                                      [boolean]
+  -q, --queryRegex      Regex for queries to include (before any label
+                        overrides). Examples: '^C', '^[^C]', ...        [string]
+  -n, --name            Custom output file name
+                                              [string] [default: "data_all.csv"]
+      --inputName       Custom input file name per experiment
+                                           [string] [default: "query-times.csv"]
+      --inputDelimiter  Delimiter for the input CSV file [string] [default: ";"]
+```
+
 ## License
 This code is copyrighted by [Ghent University – imec](http://idlab.ugent.be/)
 and released under the [MIT license](http://opensource.org/licenses/MIT).
