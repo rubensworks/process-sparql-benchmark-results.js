@@ -8,21 +8,16 @@ import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 import type { ITaskContext } from '../../ITaskContext';
 import { getColorScheme, getExperimentNames, handleCsvFile, toSvg } from './TexUtils';
 
-export const command = 'query <experiment-dir...>';
-export const desc = 'Plot the query execution times from the given experiments';
+export const command = 'queryTimes <query> <experiment-dir...>';
+export const desc = 'Plot the query result arrival times from the given experiments';
 export const builder = (yargs: Argv<any>): Argv<any> =>
   yargs
     .options({
-      queryRegex: {
-        type: 'string',
-        alias: 'q',
-        describe: 'Regex for queries to include (before any label overrides). Examples: \'^C\', \'^[^C]\', ...',
-      },
       name: {
         type: 'string',
         alias: 'n',
         describe: 'Custom output file name',
-        default: 'plot_queries_data',
+        default: 'query_times',
       },
       color: {
         type: 'string',
@@ -62,10 +57,6 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         type: 'string',
         describe: 'Comma-separated list of combination labels to use',
       },
-      overrideQueryLabels: {
-        type: 'string',
-        describe: 'Comma-separated list of query labels to use',
-      },
       svg: {
         type: 'boolean',
         describe: 'If the tex file should be converted to svg via the tex2svg command',
@@ -75,88 +66,58 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
     // Load CLI args
+    const query: string = argv.query;
     const { experimentDirectories, experimentNames, experimentIds } = getExperimentNames(argv);
-    const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
     const colorScheme = getColorScheme(argv, experimentDirectories);
 
-    // Prepare query CSV file with averages per query group
-    let queryNames: string[] | undefined;
-    const outputCsvEntries: Record<string, number[]> = {};
-    for (const experimentDirectory of experimentDirectories) {
+    // Load query times from CSV files
+    const resultsArrivalTimes: Record<string, string>[] = [];
+    for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
       // Read CSV file
-      const totals: Record<string, number[]> = {};
+      let foundQuery = false;
       await handleCsvFile(experimentDirectory, argv, data => {
-        if (!queryRegex || queryRegex.test(data.name)) {
-          if (!(data.name in totals)) {
-            totals[data.name] = [];
+        if (!foundQuery && data.name === query) {
+          foundQuery = true;
+          const times: string[] = data.timestamps.split(',');
+          for (const [ i, time ] of times.entries()) {
+            if (i >= resultsArrivalTimes.length) {
+              resultsArrivalTimes.push({});
+            }
+            resultsArrivalTimes[i][experimentId] = time;
           }
-          totals[data.name].push(Number.parseInt(data.time, 10));
         }
       });
-
-      // Calculate average
-      const averages: Record<string, number> = {};
-      for (const [ query, times ] of Object.entries(totals)) {
-        const average = times.reduce((sum, current) => sum + current) / times.length;
-        averages[query] = average;
-      }
-
-      // Set query names and count
-      if (!queryNames) {
-        queryNames = Object.keys(averages);
-        for (const queryName of queryNames) {
-          outputCsvEntries[queryName] = [];
-        }
-      } else if (queryNames.join(',') !== Object.keys(averages).join(',')) {
-        throw new Error(`Tried to plot experiments with different query sets`);
-      }
-
-      // Append averaged result
-      for (const queryName of queryNames) {
-        outputCsvEntries[queryName].push(averages[queryName]);
-      }
-    }
-    if (!queryNames) {
-      throw new Error(`No queries could be found`);
-    }
-    // Determine query labels
-    if (argv.overrideQueryLabels) {
-      const overrideQueryLabels: string[] = argv.overrideQueryLabels.split(',');
-      if (overrideQueryLabels.length !== queryNames.length) {
-        throw new Error(`Invalid query labels override, expected ${queryNames.length} labels while ${overrideQueryLabels.length} where given`);
-      }
-      // Relabel outputCsvEntries entries
-      for (const [ i, queryName ] of queryNames.entries()) {
-        const averages = outputCsvEntries[queryName];
-        delete outputCsvEntries[queryName];
-        outputCsvEntries[overrideQueryLabels[i]] = averages;
-      }
-      queryNames = overrideQueryLabels;
     }
 
     // Write output CSV file
     const csvOutputStream = fs.createWriteStream(Path.join(context.cwd, `${argv.name}.csv`));
-    csvOutputStream.write(`query;${experimentIds.join(';')}\n`);
-    for (const [ key, columns ] of Object.entries(outputCsvEntries)) {
-      csvOutputStream.write(`${key};${columns.join(';')}\n`);
+    csvOutputStream.write(`${experimentNames.join(';')}\n`);
+    for (const resultArrivalTimes of resultsArrivalTimes) {
+      let first = true;
+      for (const experimentId of experimentIds) {
+        if (first) {
+          first = false;
+        } else {
+          csvOutputStream.write(`;`);
+        }
+        csvOutputStream.write(`${resultArrivalTimes[experimentId] || ''}`);
+      }
+      csvOutputStream.write(`\n`);
     }
     csvOutputStream.close();
 
     // Prepare bar lines
-    const barLines = experimentNames
-      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=\\thisrow{${id}} / 1000, col sep=semicolon]{"${argv.name}.csv"};`)
+    const lines = experimentNames
+      .map((name, id) => `\\addplot+[mark=none] table [y expr=\\coordindex+1, x=${name}, col sep=semicolon]{"${argv.name}.csv"};`)
       .join('\n');
 
     // Instantiate template
     await instantiateTemplate(
-      Path.join(context.templatesRoot, 'tex', 'plot_query_data.tex'),
+      Path.join(context.templatesRoot, 'tex', 'plot_query_times.tex'),
       Path.join(context.cwd, `${argv.name}.tex`),
       {
-        X_LIMITS: experimentDirectories.length * 2,
-        WIDTH: queryNames.length * 20,
-        QUERIES: queryNames.join(','),
         LEGEND: experimentNames.map(name => name.replace(/_/gu, '\\_')).join(','),
-        BARS: barLines,
+        LINES: lines,
         COLOR_SCHEME: colorScheme,
         LEGEND_POS: argv.legendPos,
         ...argv.maxY ? { Y_MAX: `ymax=${argv.maxY},` } : {},
