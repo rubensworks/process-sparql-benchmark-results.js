@@ -35,7 +35,9 @@ as explained hereafter.
 psbr <command>
 
 Commands:
-  psbr tex  Creates a LaTeX TikZ plot file
+  psbr csv    Creates CSV files
+  psbr stats  Derive statistics from experiments
+  psbr tex    Creates a LaTeX TikZ plot file
 
 Options:
       --version  Show version number                                   [boolean]
@@ -233,6 +235,47 @@ Options:
       --inputName       Custom input file name per experiment
                                            [string] [default: "query-times.csv"]
       --inputDelimiter  Delimiter for the input CSV file [string] [default: ";"]
+```
+
+### 2.3. Derive statistics
+
+Subcommands of `psbr stats` can derive statistics.
+
+#### 2.3.1. Summarize Docker stats
+
+By invoking `psbr stats docker` with a Docker experimental result file,
+a summary of all its contents will be created.
+
+For instance, if a Docker-based experiment may produce a file such as `stats-server.csv`,
+which is expected to look as follows:
+```text
+cpu_percentage,memory,memory_percentage,received,transmitted
+0.012520939947780679,122277888,5.856675939622464,882,0
+0,122228736,5.8543217336372875,882,0
+```
+
+Based on this, the following summary will be printed
+```csv
+CPU: 0.01 %
+Memory relative: 116.59 MB
+Memory absolute: 5.86 %
+Received: 0.00 MB
+Transmitted: 0.00 MB
+```
+
+**Full usage**:
+
+```text
+psbr stats docker <docker-csv-file>
+
+Show the stats of an Docker CSV file from an experiment
+
+Options:
+      --version  Show version number                                   [boolean]
+      --cwd      The current working directory             [string] [default: .]
+  -v, --verbose  If more logging output should be generated            [boolean]
+      --help     Show help                                             [boolean]
+  -d, --digits   The precision of output numbers           [number] [default: 2]
 ```
 
 ## License
