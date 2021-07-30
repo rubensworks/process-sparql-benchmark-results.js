@@ -73,7 +73,7 @@ export function getColorScheme(argv: Record<string, any>, experimentDirectories:
     colorScheme = argv.color;
   } else {
     // We only allow even indexes, as uneven spectral schemes have a yellow tint that is hard to read on screens
-    const colorSchemeIndex = (Math.round(experimentDirectories.length + 2 - 1) / 2) * 2;
+    const colorSchemeIndex = Math.max(3, (Math.round(experimentDirectories.length + 2 - 1) / 2) * 2);
     colorScheme = `Spectral-${colorSchemeIndex}`;
   }
   return colorScheme;
