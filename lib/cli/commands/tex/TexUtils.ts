@@ -15,10 +15,13 @@ export function getExperimentNames(argv: Record<string, any>): {
   experimentIds: number[];
 } {
   const experimentDirectories: string[] = argv.experimentDir;
-  let experimentNames = experimentDirectories.map(dir => {
+  let experimentNames = experimentDirectories.map((dir, index) => {
     const lastSlash = dir.lastIndexOf(Path.sep);
     if (lastSlash >= 0) {
-      return dir.slice(lastSlash + 1);
+      dir = dir.slice(lastSlash + 1);
+    }
+    if (!dir) {
+      return `experiment_${index}`;
     }
     return dir;
   });
