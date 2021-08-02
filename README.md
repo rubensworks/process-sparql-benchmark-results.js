@@ -137,6 +137,8 @@ interactive-short-5;0;0;0;
 interactive-short-5;1;0;0;
 ```
 
+Optionally, another index of the query can be selected by suffixing the query name with `.index`, such as `psbr tex queryTimes L2.3`.
+
 **Full usage**:
 ```text
 psbr tex queryTimes <query> <experiment-dir...>

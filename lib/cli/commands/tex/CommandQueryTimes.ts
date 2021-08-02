@@ -66,9 +66,17 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
     // Load CLI args
-    const query: string = argv.query;
+    let query: string = argv.query;
+    let id = '0';
     const { experimentDirectories, experimentNames, experimentIds } = getExperimentNames(argv);
     const colorScheme = getColorScheme(argv, experimentDirectories);
+
+    // Determine optional query id
+    const dotPos = query.indexOf('.');
+    if (dotPos >= 0) {
+      id = query.slice(dotPos + 1, query.length);
+      query = query.slice(0, Math.max(0, dotPos));
+    }
 
     // Load query times from CSV files
     const resultsArrivalTimes: Record<string, string>[] = [];
@@ -76,7 +84,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       // Read CSV file
       let foundQuery = false;
       await handleCsvFile(experimentDirectory, argv, data => {
-        if (!foundQuery && data.name === query) {
+        if (!foundQuery && data.name === query && (!id || data.id === id)) {
           foundQuery = true;
           const times: string[] = data.timestamps.split(/[ ,]/u);
           for (const [ i, time ] of times.entries()) {
@@ -108,7 +116,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Prepare bar lines
     const lines = experimentNames
-      .map((name, id) => `\\addplot+[mark=none] table [y expr=\\coordindex+1, x=${name}, col sep=semicolon]{"${argv.name}.csv"};`)
+      .map(name => `\\addplot+[mark=none] table [y expr=\\coordindex+1, x=${name}, col sep=semicolon]{"${argv.name}.csv"};`)
       .join('\n');
 
     // Instantiate template
