@@ -78,7 +78,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       await handleCsvFile(experimentDirectory, argv, data => {
         if (!foundQuery && data.name === query) {
           foundQuery = true;
-          const times: string[] = data.timestamps.split(',');
+          const times: string[] = data.timestamps.split(/[ ,]/u);
           for (const [ i, time ] of times.entries()) {
             if (i >= resultsArrivalTimes.length) {
               resultsArrivalTimes.push({});
