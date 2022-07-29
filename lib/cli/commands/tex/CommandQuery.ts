@@ -153,7 +153,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       Path.join(context.cwd, `${argv.name}.tex`),
       {
         X_LIMITS: experimentDirectories.length * 2,
-        WIDTH: queryNames.length * 20,
+        WIDTH: queryNames.length * (experimentNames.length + 1) * 4,
         QUERIES: queryNames.join(','),
         LEGEND: experimentNames.map(name => name.replace(/_/gu, '\\_')).join(','),
         BARS: barLines,
