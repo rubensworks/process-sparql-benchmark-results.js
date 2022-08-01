@@ -6,7 +6,7 @@ import { instantiateTemplate } from '../../../TemplateUtils';
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 
 import type { ITaskContext } from '../../ITaskContext';
-import { getColorScheme, getExperimentNames, handleCsvFile, toSvg } from './TexUtils';
+import { getColorScheme, getExperimentNames, getQueryNames, handleCsvFile, relabelQueryNames, toSvg } from './TexUtils';
 
 export const command = 'query <experiment-dir...>';
 export const desc = 'Plot the query execution times from the given experiments';
@@ -81,7 +81,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Prepare query CSV file with averages per query group
     let queryNames: string[] | undefined;
-    const outputCsvEntries: Record<string, number[]> = {};
+    let outputCsvEntries: Record<string, number[]> = {};
     for (const experimentDirectory of experimentDirectories) {
       // Read CSV file
       const totals: Record<string, number[]> = {};
@@ -120,19 +120,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       throw new Error(`No queries could be found`);
     }
     // Determine query labels
-    if (argv.overrideQueryLabels) {
-      const overrideQueryLabels: string[] = argv.overrideQueryLabels.split(',');
-      if (overrideQueryLabels.length !== queryNames.length) {
-        throw new Error(`Invalid query labels override, expected ${queryNames.length} labels while ${overrideQueryLabels.length} where given`);
-      }
-      // Relabel outputCsvEntries entries
-      for (const [ i, queryName ] of queryNames.entries()) {
-        const averages = outputCsvEntries[queryName];
-        delete outputCsvEntries[queryName];
-        outputCsvEntries[overrideQueryLabels[i]] = averages;
-      }
-      queryNames = overrideQueryLabels;
-    }
+    queryNames = getQueryNames(queryNames, argv);
+    outputCsvEntries = relabelQueryNames(outputCsvEntries, queryNames);
 
     // Write output CSV file
     const csvOutputStream = fs.createWriteStream(Path.join(context.cwd, `${argv.name}.csv`));

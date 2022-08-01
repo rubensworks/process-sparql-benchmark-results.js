@@ -43,6 +43,26 @@ export function getExperimentNames(argv: Record<string, any>): {
   };
 }
 
+export function getQueryNames(queryNames: string[], argv: Record<string, any>): string[] {
+  if (argv.overrideQueryLabels) {
+    const overrideQueryLabels: string[] = argv.overrideQueryLabels.split(',');
+    if (overrideQueryLabels.length !== queryNames.length) {
+      throw new Error(`Invalid query labels override, expected ${queryNames.length} labels while ${overrideQueryLabels.length} where given`);
+    }
+    queryNames = overrideQueryLabels;
+  }
+  return queryNames;
+}
+
+export function relabelQueryNames<T>(record: Record<string, T>, queryNames: string[]): Record<string, T> {
+  for (const [ i, queryNameOld ] of Object.keys(record).entries()) {
+    const averages = record[queryNameOld];
+    delete record[queryNameOld];
+    record[queryNames[i]] = averages;
+  }
+  return record;
+}
+
 /**
  * Read a CSV file and handle each row.
  * @param experimentDirectory An experiment directory.

@@ -11,7 +11,7 @@ import { TableSerializerCsv } from './TableSerializerCsv';
 import { TableSerializerMarkdown } from './TableSerializerMarkdown';
 
 export const command = 'query <experiment-dir...>';
-export const desc = 'Summarize all query execution times from the given experiments';
+export const desc = 'List all query execution times from the given experiments';
 export const builder = (yargs: Argv<any>): Argv<any> =>
   yargs
     .options({
@@ -43,7 +43,7 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
       },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => wrapVisualProgress('Summarizing data', async() => {
+  async(context: ITaskContext) => wrapVisualProgress('Listing data', async() => {
     // Load options
     const experimentDirectories: string[] = argv.experimentDir;
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
