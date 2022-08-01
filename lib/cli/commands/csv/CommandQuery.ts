@@ -7,6 +7,8 @@ import type { Argv } from 'yargs';
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 
 import type { ITaskContext } from '../../ITaskContext';
+import { TableSerializerCsv } from './TableSerializerCsv';
+import { TableSerializerMarkdown } from './TableSerializerMarkdown';
 
 export const command = 'query <experiment-dir...>';
 export const desc = 'Summarize all query execution times from the given experiments';
@@ -34,6 +36,11 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'Delimiter for the input CSV file',
         default: ';',
       },
+      markdown: {
+        type: 'boolean',
+        describe: 'If the output should be serialized as markdown',
+        default: false,
+      },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Summarizing data', async() => {
@@ -42,8 +49,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
 
     // Prepare output CSV file
-    const csvOutputStream = fs.createWriteStream(Path.join(context.cwd, `${argv.name}`));
-    csvOutputStream.write(`experiment;time\n`);
+    const os = fs.createWriteStream(Path.join(context.cwd, `${argv.name}`));
+    const serializer = argv.markdown ? new TableSerializerMarkdown(os) : new TableSerializerCsv(os);
+    serializer.writeHeader([ 'experiment', 'time' ]);
 
     // Read CSV files
     for (const experimentDirectory of experimentDirectories) {
@@ -53,7 +61,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         const parser = parse({ delimiter: argv.inputDelimiter, columns: true });
         parser.on('data', data => {
           if (!queryRegex || queryRegex.test(data.name)) {
-            csvOutputStream.write(`${experimentDirectory};${data.time}\n`);
+            serializer.writeRow([ experimentDirectory, data.time ]);
           }
         });
         parser.on('error', reject);
@@ -64,5 +72,5 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     }
 
     // Close output CSV file
-    csvOutputStream.close();
+    serializer.close();
   }));
