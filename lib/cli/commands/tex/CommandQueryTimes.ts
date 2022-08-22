@@ -135,7 +135,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           contents = contents.replace(/^\\legend.*$/u, '');
         }
         if (argv.logY) {
-          contents = contents.replace(/^ymin=0,$/u, 'ymode=log,log origin=infty,');
+          contents = contents.replace(/ymin=0,/u, 'ymode=log,log origin=infty,');
         }
         return contents;
       },

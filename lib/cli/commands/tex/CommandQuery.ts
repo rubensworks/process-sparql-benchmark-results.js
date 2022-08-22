@@ -133,7 +133,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Prepare bar lines
     const barLines = experimentNames
-      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=\\thisrow{${id}} / 1000, col sep=semicolon]{"${argv.name}.csv"};`)
+      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=(\\thisrow{${id}} / 1000), col sep=semicolon]{"${argv.name}.csv"};`)
       .join('\n');
 
     // Instantiate template
@@ -155,7 +155,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           contents = contents.replace(/^\\legend.*$/u, '');
         }
         if (argv.logY) {
-          contents = contents.replace(/^ymin=0,$/u, 'ymode=log,log origin=infty,');
+          contents = contents
+            .replace(/ymin=0,/u, 'ymode=log,log origin=infty,')
+            .replace(/ \/ 1000\)/ug, ' / 1000)+1e-5');
         }
         return contents;
       },
