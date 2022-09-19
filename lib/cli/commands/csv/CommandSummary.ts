@@ -1,10 +1,8 @@
 import * as fs from 'fs';
+import { readFileSync } from 'fs';
 import Path from 'path';
-
 import type { Argv } from 'yargs';
-
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
-
 import type { ITaskContext } from '../../ITaskContext';
 import {
   calcAverage,
@@ -53,12 +51,20 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'If queries will be averaged over',
         default: false,
       },
+      correctnessReference: {
+        type: 'string',
+        describe: 'Path to a JSON file mapping queries to expected cardinality',
+        default: '',
+      },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Summarizing data', async() => {
     // Load options
     const { experimentDirectories, experimentNames } = getExperimentNames(argv);
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
+    const correctnessReference = argv.correctnessReference ?
+      JSON.parse(readFileSync(argv.correctnessReference, 'utf8')) :
+      undefined;
 
     // Prepare output CSV file
     const os = fs.createWriteStream(Path.join(context.cwd, `${argv.name}`));
@@ -68,6 +74,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         'Experiment',
         'Average Time',
         'Average Results',
+        ...correctnessReference ? [ 'Correctness' ] : [],
         'Timeouts',
       ]);
     } else {
@@ -76,6 +83,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         'Query',
         'Time',
         'Results',
+        ...correctnessReference ? [ 'Correctness' ] : [],
         'Timeout',
       ]);
     }
@@ -104,6 +112,13 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         timesAverage[query] = calcAverage(times);
       }
 
+      // Calculate correctness
+      let correctness;
+      if (correctnessReference) {
+        correctness = Object.fromEntries(Object.entries(results)
+          .map(([ key, value ]) => [ key, value / correctnessReference[key] ]));
+      }
+
       // Determine query names
       const queryNames = getQueryNames(Object.keys(results), argv);
       timesAverage = relabelQueryNames(timesAverage, queryNames);
@@ -117,6 +132,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           experimentNames[experimentId],
           `${calcAverage(Object.values(timesAverage))}`,
           `${calcAverage(Object.values(results))}`,
+          ...correctness ? [ `${calcAverage(Object.values(correctness)) * 100}%` ] : [],
           `${calcSum(Object.values(timeout).map(value => value ? 1 : 0))}`,
         ]);
       } else {
@@ -126,6 +142,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             query,
             `${time}`,
             `${results[query]}`,
+            ...correctness ? [ `${correctness[query] * 100}%` ] : [],
             `${timeout[query]}`,
           ]);
         }
