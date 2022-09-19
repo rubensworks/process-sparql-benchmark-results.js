@@ -63,6 +63,14 @@ export function relabelQueryNames<T>(record: Record<string, T>, queryNames: stri
   return record;
 }
 
+export function calcAverage(data: number[]): number {
+  return data.reduce((sum, current) => sum + current) / data.length;
+}
+
+export function calcSum(data: number[]): number {
+  return data.reduce((sum, current) => sum + current);
+}
+
 /**
  * Read a CSV file and handle each row.
  * @param experimentDirectory An experiment directory.

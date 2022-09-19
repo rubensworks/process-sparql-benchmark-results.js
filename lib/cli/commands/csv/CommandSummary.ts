@@ -6,7 +6,14 @@ import type { Argv } from 'yargs';
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 
 import type { ITaskContext } from '../../ITaskContext';
-import { getExperimentNames, getQueryNames, handleCsvFile, relabelQueryNames } from '../tex/TexUtils';
+import {
+  calcAverage,
+  calcSum,
+  getExperimentNames,
+  getQueryNames,
+  handleCsvFile,
+  relabelQueryNames,
+} from '../tex/TexUtils';
 import { TableSerializerCsv } from './TableSerializerCsv';
 import { TableSerializerMarkdown } from './TableSerializerMarkdown';
 
@@ -41,6 +48,11 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'If the output should be serialized as markdown',
         default: false,
       },
+      queryAverage: {
+        type: 'boolean',
+        describe: 'If queries will be averaged over',
+        default: false,
+      },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Summarizing data', async() => {
@@ -51,7 +63,22 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     // Prepare output CSV file
     const os = fs.createWriteStream(Path.join(context.cwd, `${argv.name}`));
     const serializer = argv.markdown ? new TableSerializerMarkdown(os) : new TableSerializerCsv(os);
-    serializer.writeHeader([ 'Experiment', 'Query', 'Time', 'Results', 'Timeout' ]);
+    if (argv.queryAverage) {
+      serializer.writeHeader([
+        'Experiment',
+        'Average Time',
+        'Average Results',
+        'Timeouts',
+      ]);
+    } else {
+      serializer.writeHeader([
+        'Experiment',
+        'Query',
+        'Time',
+        'Results',
+        'Timeout',
+      ]);
+    }
 
     // Collect data from all experiments
     for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
@@ -66,16 +93,15 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           }
           timesTotal[data.name].push(Number.parseInt(data.time, 10));
 
-          results[data.name] = data.results;
-          timeout[data.name] = data.error;
+          results[data.name] = Number.parseInt(data.results, 10);
+          timeout[data.name] = data.error === 'true';
         }
       });
 
       // Calculate average
       let timesAverage: Record<string, number> = {};
       for (const [ query, times ] of Object.entries(timesTotal)) {
-        const average = times.reduce((sum, current) => sum + current) / times.length;
-        timesAverage[query] = average;
+        timesAverage[query] = calcAverage(times);
       }
 
       // Determine query names
@@ -85,14 +111,24 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       timeout = relabelQueryNames(timeout, queryNames);
 
       // Write rows in output file
-      for (const [ query, time ] of Object.entries(timesAverage)) {
+      if (argv.queryAverage) {
+        // Average across queries
         serializer.writeRow([
           experimentNames[experimentId],
-          query,
-          `${time}`,
-          `${results[query]}`,
-          `${timeout[query]}`,
+          `${calcAverage(Object.values(timesAverage))}`,
+          `${calcAverage(Object.values(results))}`,
+          `${calcSum(Object.values(timeout).map(value => value ? 1 : 0))}`,
         ]);
+      } else {
+        for (const [ query, time ] of Object.entries(timesAverage)) {
+          serializer.writeRow([
+            experimentNames[experimentId],
+            query,
+            `${time}`,
+            `${results[query]}`,
+            `${timeout[query]}`,
+          ]);
+        }
       }
     }
 
