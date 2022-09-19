@@ -72,8 +72,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     if (argv.queryAverage) {
       serializer.writeHeader([
         'Experiment',
-        'Average Time',
-        'Average Results',
+        'Time',
+        'Results',
         ...correctnessReference ? [ 'Correctness' ] : [],
         'Timeouts',
       ], {
@@ -147,8 +147,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         // Average across queries
         serializer.writeRow([
           experimentNames[experimentId],
-          `${calcAverage(Object.values(timesAverage)).toLocaleString('en-US')}`,
-          `${calcAverage(Object.values(results)).toLocaleString('en-US')}`,
+          `${calcAverage(Object.values(timesAverage)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          `${calcAverage(Object.values(results)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           ...correctness ? [ `${(calcAverage(Object.values(correctness)) * 100).toFixed(2)}%` ] : [],
           `${calcSum(Object.values(timeout).map(value => value ? 1 : 0))}`,
         ]);
