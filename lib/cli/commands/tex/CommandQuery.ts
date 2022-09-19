@@ -66,6 +66,11 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         type: 'string',
         describe: 'Comma-separated list of query labels to use',
       },
+      zeroReplacement: {
+        type: 'number',
+        describe: 'If zero values occur, what values they should be replaced with',
+        default: 0,
+      },
       svg: {
         type: 'boolean',
         describe: 'If the tex file should be converted to svg via the tex2svg command',
@@ -90,7 +95,13 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           if (!(data.name in totals)) {
             totals[data.name] = [];
           }
-          totals[data.name].push(Number.parseInt(data.time, 10));
+
+          let value = Number.parseInt(data.time, 10);
+          if (value === 0) {
+            value = argv.zeroReplacement;
+          }
+
+          totals[data.name].push(value);
         }
       });
 
