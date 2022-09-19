@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { readFileSync } from 'fs';
 import Path from 'path';
 import type { Argv } from 'yargs';
+import { constructCorrectnessChecker } from '../../../correctness/CorrectnessCheckerUtils';
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 import type { ITaskContext } from '../../ITaskContext';
 import {
@@ -63,7 +63,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     const { experimentDirectories, experimentNames } = getExperimentNames(argv);
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
     const correctnessReference = argv.correctnessReference ?
-      JSON.parse(readFileSync(argv.correctnessReference, 'utf8')) :
+      constructCorrectnessChecker(argv.correctnessReference) :
       undefined;
 
     // Prepare output CSV file
@@ -116,7 +116,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       let correctness;
       if (correctnessReference) {
         correctness = Object.fromEntries(Object.entries(results)
-          .map(([ key, value ]) => [ key, value / correctnessReference[key] ]));
+          .map(([ key, value ]) => [ key, correctnessReference.getCorrectness(experimentId, key, value) ]));
       }
 
       // Determine query names
@@ -130,9 +130,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         // Average across queries
         serializer.writeRow([
           experimentNames[experimentId],
-          `${calcAverage(Object.values(timesAverage))}`,
-          `${calcAverage(Object.values(results))}`,
-          ...correctness ? [ `${calcAverage(Object.values(correctness)) * 100}%` ] : [],
+          `${calcAverage(Object.values(timesAverage)).toLocaleString('en-US')}`,
+          `${calcAverage(Object.values(results)).toLocaleString('en-US')}`,
+          ...correctness ? [ `${(calcAverage(Object.values(correctness)) * 100).toFixed(2)}%` ] : [],
           `${calcSum(Object.values(timeout).map(value => value ? 1 : 0))}`,
         ]);
       } else {
