@@ -8,9 +8,9 @@ export class TableSerializerMarkdown implements ITableSerializer {
     public readonly os: fs.WriteStream,
   ) {}
 
-  public writeHeader(columns: string[]): void {
+  public writeHeader(columns: string[], options?: { align?: ('left' | 'right')[] }): void {
     this.writeRow(columns);
-    this.writeLine(columns.length);
+    this.writeLine(columns.length, options);
     this.headerColumns = columns.length;
   }
 
@@ -18,8 +18,15 @@ export class TableSerializerMarkdown implements ITableSerializer {
     this.os.write(`| ${columns.join(' | ')} |\n`);
   }
 
-  protected writeLine(columns: number): void {
-    this.os.write(`|${' --- |'.repeat(columns)}\n`);
+  protected writeLine(columns: number, options?: { align?: ('left' | 'right')[] }): void {
+    let sb = '|';
+    for (let i = 0; i < columns; i++) {
+      const alignRight = options?.align ? options.align[i] === 'right' : 'false';
+      sb += ` ---${alignRight ? ':' : ''} |`;
+    }
+    sb += '\n';
+
+    this.os.write(sb);
   }
 
   public close(): void {

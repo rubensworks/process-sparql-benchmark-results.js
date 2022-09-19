@@ -76,7 +76,15 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         'Average Results',
         ...correctnessReference ? [ 'Correctness' ] : [],
         'Timeouts',
-      ]);
+      ], {
+        align: [
+          'left',
+          'right',
+          'right',
+          'right',
+          'right',
+        ],
+      });
     } else {
       serializer.writeHeader([
         'Experiment',
@@ -85,7 +93,16 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         'Results',
         ...correctnessReference ? [ 'Correctness' ] : [],
         'Timeout',
-      ]);
+      ], {
+        align: [
+          'left',
+          'right',
+          'right',
+          'right',
+          'right',
+          'right',
+        ],
+      });
     }
 
     // Collect data from all experiments
