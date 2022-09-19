@@ -97,9 +97,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           }
 
           let value = Number.parseInt(data.time, 10);
-          if (value === 0) {
-            value = argv.zeroReplacement;
-          }
+          value = Math.max(argv.zeroReplacement, value);
 
           totals[data.name].push(value);
         }
@@ -167,7 +165,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         }
         if (argv.logY) {
           contents = contents
-            .replace(/ymin=0,/u, 'ymode=log,log origin=infty,')
+            .replace(/ymin=0,/u, 'ymin=0.000001,ymode=log,log origin=infty,log basis y={10},')
             .replace(/ \/ 1000\)/ug, ' / 1000)+1e-5');
         }
         return contents;
