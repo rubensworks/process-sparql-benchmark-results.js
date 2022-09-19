@@ -73,12 +73,14 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       serializer.writeHeader([
         'Experiment',
         'Time',
+        'Requests',
         'Results',
         ...correctnessReference ? [ 'Correctness' ] : [],
         'Timeouts',
       ], {
         align: [
           'left',
+          'right',
           'right',
           'right',
           'right',
@@ -90,12 +92,14 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         'Experiment',
         'Query',
         'Time',
+        'Requests',
         'Results',
         ...correctnessReference ? [ 'Correctness' ] : [],
         'Timeout',
       ], {
         align: [
           'left',
+          'right',
           'right',
           'right',
           'right',
@@ -109,6 +113,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
       // Read CSV file
       const timesTotal: Record<string, number[]> = {};
+      const requestsTotal: Record<string, number[]> = {};
       let results: Record<string, number> = {};
       let timeout: Record<string, boolean> = {};
       await handleCsvFile(experimentDirectory, argv, data => {
@@ -117,6 +122,12 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             timesTotal[data.name] = [];
           }
           timesTotal[data.name].push(Number.parseInt(data.time, 10));
+
+          if (!(data.name in requestsTotal)) {
+            requestsTotal[data.name] = [];
+          }
+          requestsTotal[data.name].push(Number
+            .parseInt(data.error === 'false' && data.httpRequests ? data.httpRequests : '0', 10));
 
           results[data.name] = Number.parseInt(data.results, 10);
           timeout[data.name] = data.error === 'true';
@@ -127,6 +138,10 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       let timesAverage: Record<string, number> = {};
       for (const [ query, times ] of Object.entries(timesTotal)) {
         timesAverage[query] = calcAverage(times);
+      }
+      let requestsSum: Record<string, number> = {};
+      for (const [ query, requests ] of Object.entries(requestsTotal)) {
+        requestsSum[query] = calcAverage(requests);
       }
 
       // Calculate correctness
@@ -139,6 +154,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       // Determine query names
       const queryNames = getQueryNames(Object.keys(results), argv);
       timesAverage = relabelQueryNames(timesAverage, queryNames);
+      requestsSum = relabelQueryNames(requestsSum, queryNames);
       results = relabelQueryNames(results, queryNames);
       timeout = relabelQueryNames(timeout, queryNames);
 
@@ -147,7 +163,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         // Average across queries
         serializer.writeRow([
           experimentNames[experimentId],
-          `${calcAverage(Object.values(timesAverage)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          `${calcAverage(Object.values(timesAverage)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+          `${calcSum(Object.values(requestsSum)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
           `${calcAverage(Object.values(results)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           ...correctness ? [ `${(calcAverage(Object.values(correctness)) * 100).toFixed(2)}%` ] : [],
           `${calcSum(Object.values(timeout).map(value => value ? 1 : 0))}`,
@@ -158,8 +175,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             experimentNames[experimentId],
             query,
             `${time}`,
+            `${requestsSum[query]}`,
             `${results[query]}`,
-            ...correctness ? [ `${correctness[query] * 100}%` ] : [],
+            ...correctness ? [ `${(correctness[query] * 100).toFixed(2)}%` ] : [],
             `${timeout[query]}`,
           ]);
         }
