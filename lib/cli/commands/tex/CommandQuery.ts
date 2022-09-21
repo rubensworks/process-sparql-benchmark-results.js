@@ -188,6 +188,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             .replace(/ymin=0,/u, 'ymin=0.000001,ymode=log,log origin=infty,log basis y={10},')
             .replace(/ \/ 1000\)/ug, ' / 1000)+1e-5');
         }
+        if (argv.relative) {
+          contents = contents.replace('ylabel={Duration (s)},', 'ylabel={},');
+        }
         if (metric === 'httpRequests') {
           contents = contents.replace('ylabel={Duration (s)},', 'ylabel={HTTP Requests},');
         }
