@@ -76,6 +76,12 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'If the tex file should be converted to svg via the tex2svg command',
         default: false,
       },
+      metric: {
+        type: 'string',
+        describe: 'The metric to plot',
+        choices: [ 'time', 'httpRequests' ],
+        default: 'time',
+      },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
@@ -83,6 +89,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     const { experimentDirectories, experimentNames, experimentIds } = getExperimentNames(argv);
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
     const colorScheme = getColorScheme(argv, experimentDirectories);
+    const metric = argv.metric;
 
     // Prepare query CSV file with averages per query group
     let queryNames: string[] | undefined;
@@ -96,7 +103,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             totals[data.name] = [];
           }
 
-          let value = Number.parseInt(data.time, 10);
+          let value = Number.parseInt(data[metric] || '0', 10);
           value = Math.max(argv.zeroReplacement, value);
 
           totals[data.name].push(value);
@@ -142,7 +149,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Prepare bar lines
     const barLines = experimentNames
-      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=(\\thisrow{${id}} / 1000), col sep=semicolon]{"${argv.name}.csv"};`)
+      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=(\\thisrow{${id}}${metric === 'time' ? ' / 1000' : ''}), col sep=semicolon]{"${argv.name}.csv"};`)
       .join('\n');
 
     // Instantiate template
@@ -167,6 +174,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           contents = contents
             .replace(/ymin=0,/u, 'ymin=0.000001,ymode=log,log origin=infty,log basis y={10},')
             .replace(/ \/ 1000\)/ug, ' / 1000)+1e-5');
+        }
+        if (metric === 'httpRequests') {
+          contents = contents.replace('ylabel={Duration (s)},', 'ylabel={HTTP Requests},');
         }
         return contents;
       },
