@@ -82,6 +82,11 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         choices: [ 'time', 'httpRequests' ],
         default: 'time',
       },
+      relative: {
+        type: 'boolean',
+        describe: 'If the maximum value per query should be set to 1, and all other values made relative to that.',
+        default: false,
+      },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
@@ -135,6 +140,14 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     if (!queryNames) {
       throw new Error(`No queries could be found`);
     }
+    if (argv.relative) {
+      // Make values relative per query
+      for (const queryName of Object.keys(outputCsvEntries)) {
+        const values = outputCsvEntries[queryName];
+        const maxValue = [ ...values ].sort((left, right) => left - right)[values.length - 1];
+        outputCsvEntries[queryName] = outputCsvEntries[queryName].map(value => value / maxValue);
+      }
+    }
     // Determine query labels
     queryNames = getQueryNames(queryNames, argv);
     outputCsvEntries = relabelQueryNames(outputCsvEntries, queryNames);
@@ -149,7 +162,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Prepare bar lines
     const barLines = experimentNames
-      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=(\\thisrow{${id}}${metric === 'time' ? ' / 1000' : ''}), col sep=semicolon]{"${argv.name}.csv"};`)
+      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=(\\thisrow{${id}}${metric === 'time' && !argv.relative ? ' / 1000' : ''}), col sep=semicolon]{"${argv.name}.csv"};`)
       .join('\n');
 
     // Instantiate template
