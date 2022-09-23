@@ -14,7 +14,10 @@ export class TableSerializerMarkdown implements ITableSerializer {
     this.headerColumns = columns.length;
   }
 
-  public writeRow(columns: string[]): void {
+  public writeRow(columns: string[], options?: { mark?: boolean }): void {
+    if (options?.mark) {
+      columns = columns.map(value => `**${value}**`);
+    }
     this.os.write(`| ${columns.join(' | ')} |\n`);
   }
 

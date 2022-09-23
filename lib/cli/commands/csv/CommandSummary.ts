@@ -56,6 +56,10 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'Path to a JSON file mapping queries to expected cardinality',
         default: '',
       },
+      markRows: {
+        type: 'string',
+        describe: 'Comma-separated list of row id\'s to mark (markdown-only)',
+      },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Summarizing data', async() => {
@@ -65,6 +69,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     const correctnessReference = argv.correctnessReference ?
       constructCorrectnessChecker(argv.correctnessReference) :
       undefined;
+    const markRows: number[] = argv.markRows ?
+      argv.markRows.split(',').map((value: string) => Number.parseInt(value, 10)) :
+      [];
 
     // Prepare output CSV file
     const os = fs.createWriteStream(Path.join(context.cwd, `${argv.name}`));
@@ -171,7 +178,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           `${calcAverage(Object.values(results)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           ...correctness ? [ `${(calcAverage(Object.values(correctness)) * 100).toFixed(2)}%` ] : [],
           `${calcSum(Object.values(timeout).map(value => value ? 1 : 0))}`,
-        ]);
+        ], { mark: markRows.includes(experimentId) });
       } else {
         for (const [ query, time ] of Object.entries(timesAverage)) {
           serializer.writeRow([
@@ -182,7 +189,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             `${results[query]}`,
             ...correctness ? [ `${(correctness[query] * 100).toFixed(2)}%` ] : [],
             `${timeout[query]}`,
-          ]);
+          ], { mark: markRows.includes(experimentId) });
         }
       }
     }
