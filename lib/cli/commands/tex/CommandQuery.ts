@@ -99,6 +99,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     // Prepare query CSV file with averages per query group
     let queryNames: string[] | undefined;
     let outputCsvEntries: Record<string, number[]> = {};
+    const maxQueryValues: Record<string, number> = {};
     for (const experimentDirectory of experimentDirectories) {
       // Read CSV file
       const totals: Record<string, number[]> = {};
@@ -117,9 +118,20 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
       // Calculate average
       const averages: Record<string, number> = {};
+      const averageMinus: Record<string, number> = {};
+      const averagePlus: Record<string, number> = {};
       for (const [ query, times ] of Object.entries(totals)) {
         const average = times.reduce((sum, current) => sum + current) / times.length;
         averages[query] = average;
+        averageMinus[query] = average - times.reduce((minV, value) => Math.min(value, minV));
+        const maxValue = times.reduce((maxV, value) => Math.max(value, maxV));
+        averagePlus[query] = maxValue - average;
+
+        if (!(query in maxQueryValues)) {
+          maxQueryValues[query] = maxValue;
+        } else {
+          maxQueryValues[query] = Math.max(maxQueryValues[query], maxValue);
+        }
       }
 
       // Set query names and count
@@ -132,9 +144,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         throw new Error(`Tried to plot experiments with different query sets`);
       }
 
-      // Append averaged result
+      // Append average, min, and max result
       for (const queryName of queryNames) {
-        outputCsvEntries[queryName].push(averages[queryName]);
+        outputCsvEntries[queryName].push(averages[queryName], averageMinus[queryName], averagePlus[queryName]);
       }
     }
     if (!queryNames) {
@@ -143,9 +155,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     if (argv.relative) {
       // Make values relative per query
       for (const queryName of Object.keys(outputCsvEntries)) {
-        const values = outputCsvEntries[queryName];
-        const maxValue = [ ...values ].sort((left, right) => left - right)[values.length - 1];
-        outputCsvEntries[queryName] = outputCsvEntries[queryName].map(value => value / maxValue);
+        outputCsvEntries[queryName] = outputCsvEntries[queryName].map(value => value / maxQueryValues[queryName]);
       }
     }
     // Determine query labels
@@ -154,7 +164,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Write output CSV file
     const csvOutputStream = fs.createWriteStream(Path.join(context.cwd, `${argv.name}.csv`));
-    csvOutputStream.write(`query;${experimentIds.join(';')}\n`);
+    csvOutputStream.write(`query;${experimentIds.map(id => `${id}-mean;${id}-minus;${id}-plus`).join(';')}\n`);
     for (const [ key, columns ] of Object.entries(outputCsvEntries)) {
       csvOutputStream.write(`${key};${columns.join(';')}\n`);
     }
@@ -162,7 +172,11 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Prepare bar lines
     const barLines = experimentNames
-      .map((name, id) => `\\addplot+[ybar] table [x=query, y expr=(\\thisrow{${id}}${metric === 'time' && !argv.relative ? ' / 1000' : ''}), col sep=semicolon]{"${argv.name}.csv"};`)
+      .map((name, id) => {
+        const offset = (id - ((experimentNames.length - 1) / 2)) * 2.75;
+        const yModifier = metric === 'time' && !argv.relative ? ' / 1000' : '';
+        return `\\addplot+[ybar, xshift=${offset}pt,legend image post style={xshift=${-offset}pt}] table [x=query, y expr=(\\thisrow{${id}-mean}${yModifier}), y error plus expr=(\\thisrow{${id}-plus}${yModifier}), y error minus expr=(\\thisrow{${id}-minus}${yModifier}), col sep=semicolon]{"${argv.name}.csv"};`;
+      })
       .join('\n');
 
     // Instantiate template
