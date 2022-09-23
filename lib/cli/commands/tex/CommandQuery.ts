@@ -6,7 +6,15 @@ import { instantiateTemplate } from '../../../TemplateUtils';
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 
 import type { ITaskContext } from '../../ITaskContext';
-import { getColorScheme, getExperimentNames, getQueryNames, handleCsvFile, relabelQueryNames, toSvg } from './TexUtils';
+import {
+
+  getColorScheme,
+  getExperimentNames,
+  getQueryNames,
+  handleCsvFile,
+  relabelQueryNames,
+  toSvg,
+} from './TexUtils';
 
 export const command = 'query <experiment-dir...>';
 export const desc = 'Plot the query execution times from the given experiments';
@@ -103,6 +111,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     for (const experimentDirectory of experimentDirectories) {
       // Read CSV file
       const totals: Record<string, number[]> = {};
+      const totalsFirst: Record<string, number[]> = {};
       await handleCsvFile(experimentDirectory, argv, data => {
         if (!queryRegex || queryRegex.test(data.name)) {
           if (!(data.name in totals)) {
@@ -113,6 +122,13 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           value = Math.max(argv.zeroReplacement, value);
 
           totals[data.name].push(value);
+
+          if (data.timestamps) {
+            if (!(data.name in totalsFirst)) {
+              totalsFirst[data.name] = [];
+            }
+            totalsFirst[data.name].push(Number.parseInt(data.timestamps.split(' ')[0], 10));
+          }
         }
       });
 
@@ -133,6 +149,16 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           maxQueryValues[query] = Math.max(maxQueryValues[query], maxValue);
         }
       }
+      const averagesFirst: Record<string, number> = {};
+      const averageFirstMinus: Record<string, number> = {};
+      const averageFirstPlus: Record<string, number> = {};
+      for (const [ query, times ] of Object.entries(totalsFirst)) {
+        const average = times.reduce((sum, current) => sum + current) / times.length;
+        averagesFirst[query] = average;
+        averageFirstMinus[query] = average - times.reduce((minV, value) => Math.min(value, minV));
+        const maxValue = times.reduce((maxV, value) => Math.max(value, maxV));
+        averageFirstPlus[query] = maxValue - average;
+      }
 
       // Set query names and count
       if (!queryNames) {
@@ -146,7 +172,18 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
       // Append average, min, and max result
       for (const queryName of queryNames) {
-        outputCsvEntries[queryName].push(averages[queryName], averageMinus[queryName], averagePlus[queryName]);
+        outputCsvEntries[queryName].push(
+          averages[queryName],
+          averageMinus[queryName],
+          averagePlus[queryName],
+        );
+        if (metric === 'time') {
+          outputCsvEntries[queryName].push(
+            averagesFirst[queryName],
+            averageFirstMinus[queryName],
+            averageFirstPlus[queryName],
+          );
+        }
       }
     }
     if (!queryNames) {
@@ -164,20 +201,36 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Write output CSV file
     const csvOutputStream = fs.createWriteStream(Path.join(context.cwd, `${argv.name}.csv`));
-    csvOutputStream.write(`query;${experimentIds.map(id => `${id}-mean;${id}-minus;${id}-plus`).join(';')}\n`);
+    csvOutputStream.write(`query;${experimentIds.map(id => {
+      let value = `${id}-mean;${id}-minus;${id}-plus`;
+      if (metric === 'time') {
+        value = `${value};${id}-first-mean;${id}-first-minus;${id}-first-plus`;
+      }
+      return value;
+    }).join(';')}\n`);
     for (const [ key, columns ] of Object.entries(outputCsvEntries)) {
       csvOutputStream.write(`${key};${columns.join(';')}\n`);
     }
     csvOutputStream.close();
 
     // Prepare bar lines
-    const barLines = experimentNames
+    let barLines = experimentNames
       .map((name, id) => {
         const offset = (id - ((experimentNames.length - 1) / 2)) * 2.75;
         const yModifier = metric === 'time' && !argv.relative ? ' / 1000' : '';
         return `\\addplot+[ybar, xshift=${offset}pt,legend image post style={xshift=${-offset}pt}] table [x=query, y expr=(\\thisrow{${id}-mean}${yModifier}), y error plus expr=(\\thisrow{${id}-plus}${yModifier}), y error minus expr=(\\thisrow{${id}-minus}${yModifier}), col sep=semicolon]{"${argv.name}.csv"};`;
       })
       .join('\n');
+    if (metric === 'time') {
+      const extraBarLines = experimentNames
+        .map((name, id) => {
+          const offset = (id - ((experimentNames.length - 1) / 2)) * 2.75;
+          const yModifier = metric === 'time' && !argv.relative ? ' / 1000' : '';
+          return `\\addplot+[only marks,xshift=${offset}pt,mark=star,mark options={color=gray,scale=0.5}] table [x=query, y expr=(\\thisrow{${id}-first-mean}${yModifier}), col sep=semicolon]{"${argv.name}.csv"};`;
+        })
+        .join('\n');
+      barLines = `${barLines}\n${extraBarLines}`;
+    }
 
     // Instantiate template
     await instantiateTemplate(
