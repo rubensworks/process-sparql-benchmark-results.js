@@ -67,6 +67,11 @@ export function calcAverage(data: number[]): number {
   return data.reduce((sum, current) => sum + current) / data.length;
 }
 
+export function calcMedian(data: number[]): number {
+  data = [ ...data ].sort((left, right) => left - right);
+  return data[Math.floor(data.length / 2)];
+}
+
 export function calcSum(data: number[]): number {
   return data.reduce((sum, current) => sum + current);
 }

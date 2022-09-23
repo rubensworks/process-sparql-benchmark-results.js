@@ -5,7 +5,7 @@ import { constructCorrectnessChecker } from '../../../correctness/CorrectnessChe
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 import type { ITaskContext } from '../../ITaskContext';
 import {
-  calcAverage,
+  calcAverage, calcMedian,
   calcSum,
   getExperimentNames,
   getQueryNames,
@@ -71,15 +71,17 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     const serializer = argv.markdown ? new TableSerializerMarkdown(os) : new TableSerializerCsv(os);
     if (argv.queryAverage) {
       serializer.writeHeader([
-        'Experiment',
-        'Time',
-        'Requests',
-        'Results',
-        ...correctnessReference ? [ 'Correctness' ] : [],
-        'Timeouts',
+        '',
+        '$$\\overline{t}$$',
+        '$$\\tilde{t}$$',
+        '$$\\overline{req}$$',
+        '$$\\sum ans$$',
+        ...correctnessReference ? [ '$$\\overline{cor}$$' ] : [],
+        '$$\\sum to$$',
       ], {
         align: [
           'left',
+          'right',
           'right',
           'right',
           'right',
@@ -164,6 +166,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         serializer.writeRow([
           experimentNames[experimentId],
           `${calcAverage(Object.values(timesAverage)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+          `${calcMedian(Object.values(timesAverage)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
           `${calcSum(Object.values(requestsSum)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
           `${calcAverage(Object.values(results)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           ...correctness ? [ `${(calcAverage(Object.values(correctness)) * 100).toFixed(2)}%` ] : [],
