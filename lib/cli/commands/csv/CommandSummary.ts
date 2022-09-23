@@ -81,6 +81,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         '',
         '$$\\overline{t}$$',
         '$$\\tilde{t}$$',
+        '$$\\overline{t}_1$$',
+        '$$\\tilde{t}_1$$',
         '$$\\overline{req}$$',
         '$$\\sum ans$$',
         ...correctnessReference ? [ '$$\\overline{cor}$$' ] : [],
@@ -88,6 +90,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       ], {
         align: [
           'left',
+          'right',
+          'right',
           'right',
           'right',
           'right',
@@ -122,6 +126,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
       // Read CSV file
       const timesTotal: Record<string, number[]> = {};
+      const timesFirstTotal: Record<string, number[]> = {};
       const requestsTotal: Record<string, number[]> = {};
       let results: Record<string, number> = {};
       let timeout: Record<string, boolean> = {};
@@ -140,13 +145,28 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
           results[data.name] = Number.parseInt(data.results, 10);
           timeout[data.name] = data.error === 'true';
+
+          if (data.timestamps) {
+            if (!(data.name in timesFirstTotal)) {
+              timesFirstTotal[data.name] = [];
+            }
+            timesFirstTotal[data.name].push(Number.parseInt(data.timestamps.split(' ')[0], 10));
+          }
         }
       });
 
       // Calculate average
       let timesAverage: Record<string, number> = {};
+      let timesAll: number[] = [];
       for (const [ query, times ] of Object.entries(timesTotal)) {
         timesAverage[query] = calcAverage(times);
+        timesAll = [ ...timesAll, ...times ];
+      }
+      let timesFirstAverage: Record<string, number> = {};
+      let timesFirstAll: number[] = [];
+      for (const [ query, times ] of Object.entries(timesFirstTotal)) {
+        timesFirstAverage[query] = calcAverage(times);
+        timesFirstAll = [ ...timesFirstAll, ...times ];
       }
       let requestsSum: Record<string, number> = {};
       for (const [ query, requests ] of Object.entries(requestsTotal)) {
@@ -163,17 +183,29 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       // Determine query names
       const queryNames = getQueryNames(Object.keys(results), argv);
       timesAverage = relabelQueryNames(timesAverage, queryNames);
+      timesFirstAverage = relabelQueryNames(timesFirstAverage, queryNames);
       requestsSum = relabelQueryNames(requestsSum, queryNames);
       results = relabelQueryNames(results, queryNames);
       timeout = relabelQueryNames(timeout, queryNames);
 
       // Write rows in output file
       if (argv.queryAverage) {
+        const valueTimeFirstAverage = Object.values(timesFirstAverage).length === 0 ?
+          'N/A' :
+          calcAverage(Object.values(timesFirstAverage))
+            .toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const valueTimeFirstMedian = timesFirstAll.length === 0 ?
+          'N/A' :
+          calcMedian(timesFirstAll)
+            .toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
         // Average across queries
         serializer.writeRow([
           experimentNames[experimentId],
           `${calcAverage(Object.values(timesAverage)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-          `${calcMedian(Object.values(timesAverage)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+          `${calcMedian(timesAll).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+          `${valueTimeFirstAverage}`,
+          `${valueTimeFirstMedian}`,
           `${calcSum(Object.values(requestsSum)).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
           `${calcAverage(Object.values(results)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           ...correctness ? [ `${(calcAverage(Object.values(correctness)) * 100).toFixed(2)}%` ] : [],
