@@ -39,6 +39,10 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'Delimiter for the input CSV file',
         default: ';',
       },
+      overrideCombinationLabels: {
+        type: 'string',
+        describe: 'Comma-separated list of combination labels to use',
+      },
       markdown: {
         type: 'boolean',
         describe: 'If the output should be serialized as markdown',
