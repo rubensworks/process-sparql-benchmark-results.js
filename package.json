@@ -21,12 +21,15 @@
   "files": [
     "bin/**/*.d.ts",
     "bin/**/*.js",
+    "bin/**/*.js.map",
     "lib/**/*.d.ts",
     "bin/psbr",
     "lib/**/*.js",
     "lib/**/*.json",
     "lib/templates",
+    "lib/**/*.js.map",
     "index.d.ts",
+    "index.js.map",
     "index.ts"
   ],
   "scripts": {
