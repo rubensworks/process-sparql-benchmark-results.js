@@ -93,7 +93,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         '$$\\tilde{t}_1$$',
         '$$\\overline{req}$$',
         '$$\\sum ans$$',
-        ...correctnessReference ? [ '$$\\overline{cor}$$' ] : [],
+        ...correctnessReference ? [ '$$\\overline{acc}$$' ] : [],
         '$$\\sum to$$',
       ], {
         align: [
