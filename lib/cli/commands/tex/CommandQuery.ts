@@ -248,7 +248,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       },
       contents => {
         if (!argv.legend) {
-          contents = contents.replace(/^\\legend.*$/u, '');
+          contents = contents.replace(/\\legend\{.*\}/ug, '');
         }
         if (argv.logY) {
           contents = contents
