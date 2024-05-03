@@ -52,7 +52,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
       await handleCsvFile(experimentDirectory, argv, data => {
         if (!queryRegex || queryRegex.test(data.name)) {
-          const value = Number.parseInt(data.results, 10);
+          // Add one to avoid zero values, as the action does not handle those well for threshold checking.
+          const value = Number.parseInt(data.results, 10) + 1;
           total += value;
           ghbenchData.push({
             name: `${experimentNames[experimentId]} - ${data.name}.${data.id}`,
