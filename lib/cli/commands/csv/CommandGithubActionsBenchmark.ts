@@ -48,25 +48,25 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     // Collect timings
     const ghbenchData: GhbenchData = [];
     for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
-      const times: Record<string, Record<string, number>> = {};
+      let total = 0;
 
       await handleCsvFile(experimentDirectory, argv, data => {
         if (!queryRegex || queryRegex.test(data.name)) {
-          if (!times[experimentId]) {
-            times[experimentId] = {};
-          }
-          if (!times[experimentId][data.name]) {
-            times[experimentId][data.name] = 0;
-          }
-          times[experimentId][data.name] += Number.parseInt(data.time, 10);
-
+          const value = Number.parseInt(data.results, 10);
+          total += value;
           ghbenchData.push({
             name: `${experimentNames[experimentId]} - ${data.name}.${data.id}`,
             unit: 'ms',
-            value: Number.parseInt(data.results, 10),
+            value,
             extra: `Results: ${data.results}; Error: ${data.error}; HTTP Requests: ${data.httpRequests}`,
           });
         }
+      });
+
+      ghbenchData.unshift({
+        name: `${experimentNames[experimentId]} - ALL`,
+        unit: 'ms',
+        value: total,
       });
     }
 
