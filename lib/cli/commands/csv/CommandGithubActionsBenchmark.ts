@@ -38,6 +38,16 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         type: 'string',
         describe: 'Comma-separated list of combination labels to use',
       },
+      total: {
+        type: 'boolean',
+        describe: 'If total execution time across the experiment must be reported',
+        default: false,
+      },
+      detailed: {
+        type: 'boolean',
+        describe: 'If separate execution time for each query in the experiment must be reported',
+        default: true,
+      },
     });
 export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
   async(context: ITaskContext) => wrapVisualProgress('Collecting ghbench data', async() => {
@@ -55,20 +65,24 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           // Add one to avoid zero values, as the action does not handle those well for threshold checking.
           const value = Number.parseInt(data.results, 10) + 1;
           total += value;
-          ghbenchData.push({
-            name: `${experimentNames[experimentId]} - ${data.name}.${data.id}`,
-            unit: 'ms',
-            value,
-            extra: `Results: ${data.results}; Error: ${data.error}; HTTP Requests: ${data.httpRequests}`,
-          });
+          if (argv.detailed) {
+            ghbenchData.push({
+              name: `${experimentNames[experimentId]} - ${data.name}.${data.id}`,
+              unit: 'ms',
+              value,
+              extra: `Results: ${data.results}; Error: ${data.error}; HTTP Requests: ${data.httpRequests}`,
+            });
+          }
         }
       });
 
-      ghbenchData.unshift({
-        name: `${experimentNames[experimentId]} - ALL`,
-        unit: 'ms',
-        value: total,
-      });
+      if (argv.total) {
+        ghbenchData.push({
+          name: `${experimentNames[experimentId]}`,
+          unit: 'ms',
+          value: total,
+        });
+      }
     }
 
     // Write output
