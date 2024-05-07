@@ -4,7 +4,7 @@ import type { Argv } from 'yargs';
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 import type { ITaskContext } from '../../ITaskContext';
 import {
-  calcAverage,
+  calcMedian,
   getExperimentNames,
   handleCsvFile,
 } from '../tex/TexUtils';
@@ -79,7 +79,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       // Calculate averages
       let total = 0;
       for (const entry of Object.values(ghbenchDataRaw)) {
-        const value = calcAverage(entry.values);
+        const value = calcMedian(entry.values);
         total += value;
 
         // Output detailed
