@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.1.4"></a>
+## [v1.1.4](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.3...v1.1.4) - 2024-05-07
+
+### Changed
+* [Calculate median instead of average in ghbench](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/982029b0cb74d12336b50c47a0c6e05a331974d8)
+
 <a name="v1.1.3"></a>
 ## [v1.1.3](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.2...v1.1.3) - 2024-05-07
 
