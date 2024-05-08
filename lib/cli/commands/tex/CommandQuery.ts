@@ -179,9 +179,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         );
         if (metric === 'time') {
           outputCsvEntries[queryName].push(
-            averagesFirst[queryName],
-            averageFirstMinus[queryName],
-            averageFirstPlus[queryName],
+            averagesFirst[queryName] || Number.NaN,
+            averageFirstMinus[queryName] || Number.NaN,
+            averageFirstPlus[queryName] || Number.NaN,
           );
         }
       }
