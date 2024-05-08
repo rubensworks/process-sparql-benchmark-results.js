@@ -2,7 +2,7 @@
 
 [![Build status](https://github.com/rubensworks/process-sparql-benchmark-results.js/workflows/CI/badge.svg)](https://github.com/rubensworks/process-sparql-benchmark-results.js/actions?query=workflow%3ACI)
 [![Coverage Status](https://coveralls.io/repos/github/rubensworks/process-sparql-benchmark-results.js/badge.svg?branch=master)](https://coveralls.io/github/rubensworks/process-sparql-benchmark-results.js?branch=master)
-[![npm version](https://badge.fury.io/js/@rubensworks/sparql-benchmark-runner.svg)](https://www.npmjs.com/package/@rubensworks/sparql-benchmark-runner)
+[![npm version](https://badge.fury.io/js/@rubensworks/process-sparql-benchmark-results.svg)](https://www.npmjs.com/package/@rubensworks/process-sparql-benchmark-results)
 
 This package contains a set of tools to post-process query results from SPARQL benchmarks.
 
