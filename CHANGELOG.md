@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.1.5"></a>
+## [v1.1.5](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.4...v1.1.5) - 2024-05-08
+
+### Fixed
+* [Fix tex failing for queries without results](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/3173f24ff771b93ab74e54390264df872753f6a1)
+
 <a name="v1.1.4"></a>
 ## [v1.1.4](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.3...v1.1.4) - 2024-05-07
 

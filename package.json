@@ -1,6 +1,6 @@
 {
   "name": "@rubensworks/process-sparql-benchmark-results",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Personal tools to post-process query results from SPARQL benchmarks",
   "repository": "https://github.com/rubensworks/process-sparql-benchmark-results.js",
   "keywords": [
