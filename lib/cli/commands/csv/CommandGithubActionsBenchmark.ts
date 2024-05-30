@@ -58,8 +58,9 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Collect timings
     const ghbenchData: GhbenchData = [];
-    const ghbenchDataRaw: Record<string, GhbenchDataRaw> = {};
     for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
+      const ghbenchDataRaw: Record<string, GhbenchDataRaw> = {};
+
       await handleCsvFile(experimentDirectory, argv, data => {
         if (!queryRegex || queryRegex.test(data.name)) {
           const value = Number.parseInt(data.time, 10);
