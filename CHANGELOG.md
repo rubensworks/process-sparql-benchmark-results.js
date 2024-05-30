@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.1.6"></a>
+## [v1.1.6](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.5...v1.1.6) - 2024-05-30
+
+### Fixed
+* [Fix ghbench details failing with multiple experiments](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/efc22e45555537f33897917a9db1795105af2f31)
+
 <a name="v1.1.5"></a>
 ## [v1.1.5](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.4...v1.1.5) - 2024-05-08
 
