@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.2.1"></a>
+## [v1.2.1](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.2.0...v1.2.1) - 2024-06-18
+
+### Fixed
+* [Fix handling of undefined during total calc in ghbench](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/c65bcbc5438770c18b6350bc6edd98ca1849c563)
+
 <a name="v1.2.0"></a>
 ## [v1.2.0](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.6...v1.2.0) - 2024-06-18
 
