@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.2.0"></a>
+## [v1.2.0](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.6...v1.2.0) - 2024-06-18
+
+### Added
+* [Add script to postprocess BSBM output](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/3691018e4d67c6b8944f8c717ae0fb17b2c56284)
+
 <a name="v1.1.6"></a>
 ## [v1.1.6](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.1.5...v1.1.6) - 2024-05-30
 
