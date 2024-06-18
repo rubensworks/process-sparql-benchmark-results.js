@@ -612,6 +612,13 @@
   resolved "https://registry.yarnpkg.com/@rubensworks/eslint-config/-/eslint-config-1.0.1.tgz#90698e2222b2cb1b05d03c87c22615e7badcccd7"
   integrity sha512-irpYgLY/Tq+tBcISorM+kiEY75f2m0WGi+PcrnfszuDOmdRSbcTIs+AKftzYTz20MeiLdq8yKhi4/bMScV3Bmw==
 
+"@rubensworks/saxes@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@rubensworks/saxes/-/saxes-6.0.1.tgz#2f394548493a415c522d2bfd4f12fad67c9a6317"
+  integrity sha512-UW4OTIsOtJ5KSXo2Tchi4lhZqu+tlHrOAs4nNti7CrtB53kAZl3/hyrTi6HkMihxdbDM6m2Zc3swc/ZewEe1xw==
+  dependencies:
+    xmlchars "^2.2.0"
+
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.3.tgz#3802ddd21a50a949b6721ddd72da36e67e7f1b2d"
