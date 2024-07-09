@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.2.2"></a>
+## [v1.2.2](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.2.1...v1.2.2) - 2024-07-09
+
+### Fixed
+* [Parse CSV files in relax mode when quotes occur](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/0d31cad08856dc27950c149a0b282850725d5ebe)
+
 <a name="v1.2.1"></a>
 ## [v1.2.1](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.2.0...v1.2.1) - 2024-06-18
 
