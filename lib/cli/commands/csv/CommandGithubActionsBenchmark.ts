@@ -69,10 +69,17 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
               name: `${experimentNames[experimentId]} - ${data.name}`,
               unit: 'ms',
               values: [ value ],
-              extra: `Results: ${data.results}; Error: ${data.error}; HTTP Requests: ${data.httpRequests}`,
+              extra: {
+                results: [ data.results ],
+                error: [ data.error ],
+                httpRequests: [ data.httpRequests ],
+              },
             };
           } else {
             ghbenchDataRaw[data.name].values.push(value);
+            ghbenchDataRaw[data.name].extra.results.push(data.results);
+            ghbenchDataRaw[data.name].extra.error.push(data.error);
+            ghbenchDataRaw[data.name].extra.httpRequests.push(data.httpRequests);
           }
         }
       });
@@ -91,7 +98,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             name: entry.name,
             unit: entry.unit,
             value,
-            extra: entry.extra,
+            extra: `Results: [${entry.extra.results}]; Error: [${entry.extra.error}]; HTTP Requests: [${entry.extra.httpRequests}]`,
           });
         }
       }
@@ -116,7 +123,7 @@ interface GhbenchDataRaw {
   unit: string;
   values: number[];
   range?: string;
-  extra?: string;
+  extra: { results: number[]; error: boolean[]; httpRequests: number[] };
 }
 
 type GhbenchData = {
