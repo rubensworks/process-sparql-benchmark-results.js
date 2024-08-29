@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.3.4"></a>
+## [v1.3.4](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.3...v1.3.4) - 2024-08-29
+
+### Fixed
+* [Fix ghbench failing for bsbm](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/2cf432195cb2c0c3905b2a58b4be601e493a5330)
+
 <a name="v1.3.3"></a>
 ## [v1.3.3](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.2...v1.3.3) - 2024-08-29
 
