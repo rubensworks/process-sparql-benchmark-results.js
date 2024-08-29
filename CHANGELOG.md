@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.3.3"></a>
+## [v1.3.3](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.2...v1.3.3) - 2024-08-29
+
+### Fixed
+* [Fix ghbench always producing empty results](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/66aa431a0489763bbc4b9e3d146b35abbc8bd323)
+
 <a name="v1.3.2"></a>
 ## [v1.3.2](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.0...v1.3.2) - 2024-08-29
 
