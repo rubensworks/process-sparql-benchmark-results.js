@@ -87,7 +87,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       // Calculate averages
       let total = 0;
       for (const entry of Object.values(ghbenchDataRaw)) {
-        const value = calcMedian(entry.values.filter((val, index) => !entry.extra.error[index]));
+        const value = calcMedian(entry.values.filter((val, index) => entry.extra.error[index] === 'true')) || 0;
         if (!Number.isNaN(value)) {
           total += value;
         }
@@ -123,7 +123,7 @@ interface GhbenchDataRaw {
   unit: string;
   values: number[];
   range?: string;
-  extra: { results: number[]; error: boolean[]; httpRequests: number[] };
+  extra: { results: number[]; error: string[]; httpRequests: number[] };
 }
 
 type GhbenchData = {
