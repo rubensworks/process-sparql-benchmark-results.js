@@ -97,6 +97,8 @@ Options:
                                          [string] [default: "plot_queries_data"]
   -c, --color                      Color scheme name from colorbrewer2.org
                                                                         [string]
+      --shiftColorList             How many color list elements should be
+                                   skipped                 [number] [default: 0]
       --maxY                       The upper limit of the Y-axis. Defaults to
                                    maximum Y value                      [number]
       --legend                     If a legend should be included
@@ -113,9 +115,16 @@ Options:
                                    use                                  [string]
       --overrideQueryLabels        Comma-separated list of query labels to use
                                                                         [string]
+      --zeroReplacement            If zero values occur, what values they should
+                                   be replaced with        [number] [default: 0]
       --svg                        If the tex file should be converted to svg
                                    via the tex2svg command
                                                       [boolean] [default: false]
+      --metric                     The metric to plot
+                    [string] [choices: "time", "httpRequests"] [default: "time"]
+      --relative                   If the maximum value per query should be set
+                                   to 1, and all other values made relative to
+                                   that.              [boolean] [default: false]
 ```
 
 #### 2.1.2. Query result arrival times

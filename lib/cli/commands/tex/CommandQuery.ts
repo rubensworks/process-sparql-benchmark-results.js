@@ -37,6 +37,11 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         alias: 'c',
         describe: 'Color scheme name from colorbrewer2.org',
       },
+      shiftColorList: {
+        type: 'number',
+        describe: 'How many color list elements should be skipped',
+        default: 0,
+      },
       maxY: {
         type: 'number',
         describe: 'The upper limit of the Y-axis. Defaults to maximum Y value',
@@ -213,8 +218,11 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     }
     csvOutputStream.close();
 
+    // Shift color list by a number of elements
+    const prependPlotLines = argv.shiftColorList > 0 ? `\\pgfplotsset{cycle list shift=${argv.shiftColorList}}\n` : '';
+
     // Prepare bar lines
-    let barLines = experimentNames
+    let barLines = prependPlotLines + experimentNames
       .map((name, id) => {
         const offset = (id - ((experimentNames.length - 1) / 2)) * 2.75;
         const yModifier = metric === 'time' && !argv.relative ? ' / 1000' : '';
@@ -229,7 +237,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
           return `\\addplot+[only marks,xshift=${offset}pt,mark=star,mark options={color=gray,scale=0.5}] table [x=query, y expr=(\\thisrow{${id}-first-mean}${yModifier}), col sep=semicolon]{"${argv.name}.csv"};`;
         })
         .join('\n');
-      barLines = `${barLines}\n${extraBarLines}`;
+      barLines = `${barLines}\n${prependPlotLines}${extraBarLines}`;
     }
 
     // Instantiate template
