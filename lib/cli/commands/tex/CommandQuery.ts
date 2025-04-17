@@ -95,6 +95,11 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         choices: [ 'time', 'httpRequests' ],
         default: 'time',
       },
+      outliers: {
+        type: 'boolean',
+        describe: 'If outliers should be included',
+        default: true,
+      },
       relative: {
         type: 'boolean',
         describe: 'If the maximum value per query should be set to 1, and all other values made relative to that.',
@@ -226,10 +231,11 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       .map((name, id) => {
         const offset = (id - ((experimentNames.length - 1) / 2)) * 2.75;
         const yModifier = metric === 'time' && !argv.relative ? ' / 1000' : '';
-        return `\\addplot+[ybar, xshift=${offset}pt,legend image post style={xshift=${-offset}pt}] table [x=query, y expr=(\\thisrow{${id}-mean}${yModifier}), y error plus expr=(\\thisrow{${id}-plus}${yModifier}), y error minus expr=(\\thisrow{${id}-minus}${yModifier}), col sep=semicolon]{"${argv.name}.csv"};`;
+        const outliers = argv.outliers ? `, y error plus expr=(\\thisrow{${id}-plus}${yModifier}), y error minus expr=(\\thisrow{${id}-minus}${yModifier})` : '';
+        return `\\addplot+[ybar, xshift=${offset}pt,legend image post style={xshift=${-offset}pt}] table [x=query, y expr=(\\thisrow{${id}-mean}${yModifier})${outliers}, col sep=semicolon]{"${argv.name}.csv"};`;
       })
       .join('\n');
-    if (metric === 'time') {
+    if (metric === 'time' && argv.outliers) {
       const extraBarLines = experimentNames
         .map((name, id) => {
           const offset = (id - ((experimentNames.length - 1) / 2)) * 2.75;
