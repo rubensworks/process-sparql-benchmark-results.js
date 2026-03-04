@@ -89,7 +89,7 @@ export async function handleCsvFile(
 ): Promise<void> {
   const csvFile = Path.join(experimentDirectory, argv.inputName);
   await new Promise((resolve, reject) => {
-    const parser = parse({ delimiter: argv.inputDelimiter, columns: true, relax: true });
+    const parser = parse({ delimiter: argv.inputDelimiter, columns: true, relax: true, relax_column_count: true });
     parser.on('data', handler);
     parser.on('error', reject);
     parser.on('end', resolve);
