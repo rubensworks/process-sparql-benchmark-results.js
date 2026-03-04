@@ -19,3 +19,4 @@ documentation
 .eslintcache
 queries
 output.csv
+package-lock.json
