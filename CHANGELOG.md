@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.3.5"></a>
+## [v1.3.5](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.4...v1.3.5) - 2026-03-04
+
+### Added
+* [Add outliers flag to tex query command](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/5eae8b8d412c06023dc5f343d220811d6722ee39)
+* [Add shiftColorList option to tex query command](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/b6bcc8c5a524b18ff69fa0b5c9337f6298d00f42)
+
+### Fixed
+* [Fix CSV_RECORD_DONT_MATCH_COLUMNS_LENGTH by adding relax_column_count option (#35)](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/4a01873028ad1d9cc4f2420b770e9a3a2a90e14a)
+
 <a name="v1.3.4"></a>
 ## [v1.3.4](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.3...v1.3.4) - 2024-08-29
 
