@@ -20,6 +20,7 @@ module.exports = config([
       'unicorn/prefer-at': 'off',
       'unicorn/prefer-node-protocol': 'off',
       'unicorn/prefer-string-replace-all': 'off',
+      'unicorn/no-negated-condition': 'off',
     },
   },
   {

@@ -68,12 +68,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
         await handleCsvFile(experimentDirectory, argv, (data) => {
           if (!queryRegex || queryRegex.test(data.name)) {
             const value = Number.parseInt(data.time, 10);
-            if (ghbenchDataRaw[data.name]) {
-              ghbenchDataRaw[data.name].values.push(value);
-              ghbenchDataRaw[data.name].extra.results.push(data.results);
-              ghbenchDataRaw[data.name].extra.error.push(data.error);
-              ghbenchDataRaw[data.name].extra.httpRequests.push(data.httpRequests);
-            } else {
+            if (!ghbenchDataRaw[data.name]) {
               ghbenchDataRaw[data.name] = {
                 name: `${experimentNames[experimentId]} - ${data.name}`,
                 unit: 'ms',
@@ -84,6 +79,11 @@ export function handler(argv: Record<string, any>): Promise<void> {
                   httpRequests: [ data.httpRequests ],
                 },
               };
+            } else {
+              ghbenchDataRaw[data.name].values.push(value);
+              ghbenchDataRaw[data.name].extra.results.push(data.results);
+              ghbenchDataRaw[data.name].extra.error.push(data.error);
+              ghbenchDataRaw[data.name].extra.httpRequests.push(data.httpRequests);
             }
           }
         });

@@ -125,7 +125,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
       Path.join(context.templatesRoot, 'tex', 'plot_query_times.tex'),
       Path.join(context.cwd, `${argv.name}.tex`),
       {
-        LEGEND: experimentNames.map(name => name.replace('_', '\\_')).join(','),
+        LEGEND: experimentNames.map(name => name.replace(/_/gu, '\\_')).join(','),
         LINES: lines,
         COLOR_SCHEME: colorScheme,
         LEGEND_POS: argv.legendPos,

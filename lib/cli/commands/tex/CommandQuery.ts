@@ -154,10 +154,10 @@ export function handler(argv: Record<string, any>): Promise<void> {
         const maxValue = times.reduce((maxV, value) => Math.max(value, maxV));
         averagePlus[query] = maxValue - average;
 
-        if (query in maxQueryValues) {
-          maxQueryValues[query] = Math.max(maxQueryValues[query], maxValue);
-        } else {
+        if (!(query in maxQueryValues)) {
           maxQueryValues[query] = maxValue;
+        } else {
+          maxQueryValues[query] = Math.max(maxQueryValues[query], maxValue);
         }
       }
       const averagesFirst: Record<string, number> = {};
@@ -255,7 +255,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
         X_LIMITS: experimentDirectories.length * 2,
         WIDTH: queryNames.length * (experimentNames.length + 1) * 4,
         QUERIES: queryNames.join(','),
-        LEGEND: experimentNames.map(name => name.replace('_', '\\_')).join(','),
+        LEGEND: experimentNames.map(name => name.replace(/_/gu, '\\_')).join(','),
         BARS: barLines,
         COLOR_SCHEME: colorScheme,
         LEGEND_POS: argv.legendPos,
@@ -268,7 +268,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
         if (argv.logY) {
           contents = contents
             .replace(/ymin=0,/u, 'ymin=0.000001,ymode=log,log origin=infty,log basis y={10},')
-            .replace(' / 1000)', ' / 1000)+1e-5');
+            .replace(/ \/ 1000\)/ug, ' / 1000)+1e-5');
         }
         if (argv.relative) {
           contents = contents.replace('ylabel={Duration (s)},', 'ylabel={},');

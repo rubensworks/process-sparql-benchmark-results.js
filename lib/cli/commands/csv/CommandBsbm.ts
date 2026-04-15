@@ -27,7 +27,7 @@ export function builder(yargs: Argv<any>): Argv<any> {
     });
 }
 export function handler(argv: Record<string, any>): Promise<void> {
-  return wrapCommandHandler(argv, async(_context: ITaskContext) => wrapVisualProgress('Listing data', async() => {
+  return wrapCommandHandler(argv, async(_: ITaskContext) => wrapVisualProgress('Listing data', async() => {
     // Load options
     const { experimentDirectories } = getExperimentNames(argv);
 

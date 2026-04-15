@@ -126,7 +126,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
     ], {
       align: [
         'left',
-        ...<'right'[]>experimentNames.map(() => 'right'),
+        ...Array.from({ length: experimentNames.length }, (): 'right' => 'right'),
       ],
     });
     serializer.writeRow([
