@@ -10,8 +10,8 @@ import type { ITaskContext } from '../../ITaskContext';
 
 export const command = 'docker <docker-csv-file>';
 export const desc = 'Show the stats of an Docker CSV file from an experiment';
-export const builder = (yargs: Argv<any>): Argv<any> =>
-  yargs
+export function builder(yargs: Argv<any>): Argv<any> {
+  return yargs
     .options({
       digits: {
         type: 'number',
@@ -20,8 +20,9 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         default: 2,
       },
     });
-export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => {
+}
+export function handler(argv: Record<string, any>): Promise<void> {
+  return wrapCommandHandler(argv, async(context: ITaskContext) => {
     // Load options
     const file: string = argv.dockerCsvFile;
     const digits: number = argv.digits;
@@ -52,6 +53,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     context.logger.info(`Received: ${(last(entries.received) / 1_024 / 1_024).toFixed(digits)} MB`);
     context.logger.info(`Transmitted: ${(last(entries.transmitted) / 1_024 / 1_024).toFixed(digits)} MB`);
   });
+}
 
 export function average(values: number[]): number {
   return values.reduce((sum, current) => sum + current) / values.length;

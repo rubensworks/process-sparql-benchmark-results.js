@@ -2,35 +2,35 @@
   "name": "@rubensworks/process-sparql-benchmark-results",
   "version": "1.3.5",
   "description": "Personal tools to post-process query results from SPARQL benchmarks",
+  "license": "MIT",
+  "homepage": "https://github.com/rubensworks/process-sparql-benchmark-results.js#readme",
   "repository": "https://github.com/rubensworks/process-sparql-benchmark-results.js",
+  "bugs": {
+    "url": "https://github.com/rubensworks/process-sparql-benchmark-results.js/issues"
+  },
   "keywords": [
     "sparql",
     "benchmark",
     "runner"
   ],
-  "license": "MIT",
+  "main": "index.js",
   "bin": {
     "psbr": "./bin/psbr"
   },
-  "bugs": {
-    "url": "https://github.com/rubensworks/process-sparql-benchmark-results.js/issues"
-  },
-  "homepage": "https://github.com/rubensworks/process-sparql-benchmark-results.js#readme",
-  "main": "index.js",
   "typings": "index",
   "files": [
     "bin/**/*.d.ts",
     "bin/**/*.js",
     "bin/**/*.js.map",
-    "lib/**/*.d.ts",
     "bin/psbr",
-    "lib/**/*.js",
-    "lib/**/*.json",
-    "lib/templates",
-    "lib/**/*.js.map",
     "index.d.ts",
     "index.js.map",
-    "index.ts"
+    "index.ts",
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "lib/**/*.js.map",
+    "lib/**/*.json",
+    "lib/templates"
   ],
   "scripts": {
     "build": "tsc",
@@ -39,11 +39,6 @@
     "lint": "eslint . --cache",
     "prepare": "npm run build",
     "version": "manual-git-changelog onversion"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run build && npm run lint && npm run test"
-    }
   },
   "jest": {
     "globals": {
@@ -89,5 +84,10 @@
     "streamify-array": "^1.0.1",
     "ts-jest": "^26.4.3",
     "typescript": "^4.2.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run build && npm run lint && npm run test"
+    }
   }
 }

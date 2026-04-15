@@ -5,7 +5,8 @@ import { constructCorrectnessChecker } from '../../../correctness/CorrectnessChe
 import { wrapCommandHandler, wrapVisualProgress } from '../../CliHelpers';
 import type { ITaskContext } from '../../ITaskContext';
 import {
-  calcAverage, calcMedian,
+  calcAverage,
+  calcMedian,
   calcSum,
   getExperimentNames,
   getQueryNames,
@@ -17,8 +18,8 @@ import { TableSerializerMarkdown } from './TableSerializerMarkdown';
 
 export const command = 'summary <experiment-dir...>';
 export const desc = 'Summarize query results from the given experiments in a table';
-export const builder = (yargs: Argv<any>): Argv<any> =>
-  yargs
+export function builder(yargs: Argv<any>): Argv<any> {
+  return yargs
     .options({
       queryRegex: {
         type: 'string',
@@ -69,8 +70,9 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'Comma-separated list of row id\'s to mark (markdown-only)',
       },
     });
-export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => wrapVisualProgress('Summarizing data', async() => {
+}
+export function handler(argv: Record<string, any>): Promise<void> {
+  return wrapCommandHandler(argv, async(context: ITaskContext) => wrapVisualProgress('Summarizing data', async() => {
     // Load options
     const { experimentDirectories, experimentNames } = getExperimentNames(argv);
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
@@ -79,7 +81,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       undefined;
     const markRows: number[] = argv.markRows ?
       argv.markRows.split(',').map((value: string) => Number.parseInt(value, 10)) :
-      [];
+        [];
 
     // Prepare output CSV file
     const os = fs.createWriteStream(Path.join(context.cwd, `${argv.name}`));
@@ -138,7 +140,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       const requestsTotal: Record<string, number[]> = {};
       let results: Record<string, number> = {};
       let timeout: Record<string, boolean> = {};
-      await handleCsvFile(experimentDirectory, argv, data => {
+      await handleCsvFile(experimentDirectory, argv, (data) => {
         if (!queryRegex || queryRegex.test(data.name)) {
           if (!(data.name in timesTotal)) {
             timesTotal[data.name] = [];
@@ -237,3 +239,4 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     // Close output CSV file
     serializer.close();
   }));
+}

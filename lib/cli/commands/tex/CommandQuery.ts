@@ -18,8 +18,8 @@ import {
 
 export const command = 'query <experiment-dir...>';
 export const desc = 'Plot the query execution times from the given experiments';
-export const builder = (yargs: Argv<any>): Argv<any> =>
-  yargs
+export function builder(yargs: Argv<any>): Argv<any> {
+  return yargs
     .options({
       queryRegex: {
         type: 'string',
@@ -106,8 +106,9 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         default: false,
       },
     });
-export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
+}
+export function handler(argv: Record<string, any>): Promise<void> {
+  return wrapCommandHandler(argv, async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
     // Load CLI args
     const { experimentDirectories, experimentNames, experimentIds } = getExperimentNames(argv);
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
@@ -122,7 +123,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       // Read CSV file
       const totals: Record<string, number[]> = {};
       const totalsFirst: Record<string, number[]> = {};
-      await handleCsvFile(experimentDirectory, argv, data => {
+      await handleCsvFile(experimentDirectory, argv, (data) => {
         if (!queryRegex || queryRegex.test(data.name)) {
           if (!(data.name in totals)) {
             totals[data.name] = [];
@@ -153,10 +154,10 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         const maxValue = times.reduce((maxV, value) => Math.max(value, maxV));
         averagePlus[query] = maxValue - average;
 
-        if (!(query in maxQueryValues)) {
-          maxQueryValues[query] = maxValue;
-        } else {
+        if (query in maxQueryValues) {
           maxQueryValues[query] = Math.max(maxQueryValues[query], maxValue);
+        } else {
+          maxQueryValues[query] = maxValue;
         }
       }
       const averagesFirst: Record<string, number> = {};
@@ -211,7 +212,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
 
     // Write output CSV file
     const csvOutputStream = fs.createWriteStream(Path.join(context.cwd, `${argv.name}.csv`));
-    csvOutputStream.write(`query;${experimentIds.map(id => {
+    csvOutputStream.write(`query;${experimentIds.map((id) => {
       let value = `${id}-mean;${id}-minus;${id}-plus`;
       if (metric === 'time') {
         value = `${value};${id}-first-mean;${id}-first-minus;${id}-first-plus`;
@@ -254,20 +255,20 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         X_LIMITS: experimentDirectories.length * 2,
         WIDTH: queryNames.length * (experimentNames.length + 1) * 4,
         QUERIES: queryNames.join(','),
-        LEGEND: experimentNames.map(name => name.replace(/_/gu, '\\_')).join(','),
+        LEGEND: experimentNames.map(name => name.replace('_', '\\_')).join(','),
         BARS: barLines,
         COLOR_SCHEME: colorScheme,
         LEGEND_POS: argv.legendPos,
         ...argv.maxY ? { Y_MAX: `ymax=${argv.maxY},` } : {},
       },
-      contents => {
+      (contents) => {
         if (!argv.legend) {
           contents = contents.replace(/\\legend\{.*\}/ug, '');
         }
         if (argv.logY) {
           contents = contents
             .replace(/ymin=0,/u, 'ymin=0.000001,ymode=log,log origin=infty,log basis y={10},')
-            .replace(/ \/ 1000\)/ug, ' / 1000)+1e-5');
+            .replace(' / 1000)', ' / 1000)+1e-5');
         }
         if (argv.relative) {
           contents = contents.replace('ylabel={Duration (s)},', 'ylabel={},');
@@ -284,3 +285,4 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       await toSvg(argv, context);
     }
   }));
+}

@@ -14,8 +14,8 @@ import { TableSerializerMarkdown } from './TableSerializerMarkdown';
 
 export const command = 'query <experiment-dir...>';
 export const desc = 'List all query execution times from the given experiments';
-export const builder = (yargs: Argv<any>): Argv<any> =>
-  yargs
+export function builder(yargs: Argv<any>): Argv<any> {
+  return yargs
     .options({
       queryRegex: {
         type: 'string',
@@ -53,8 +53,9 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         default: '',
       },
     });
-export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => wrapVisualProgress('Listing data', async() => {
+}
+export function handler(argv: Record<string, any>): Promise<void> {
+  return wrapCommandHandler(argv, async(context: ITaskContext) => wrapVisualProgress('Listing data', async() => {
     // Load options
     const { experimentDirectories, experimentNames } = getExperimentNames(argv);
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
@@ -79,7 +80,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       const csvFile = Path.join(experimentDirectory, argv.inputName);
       await new Promise((resolve, reject) => {
         const parser = parse({ delimiter: argv.inputDelimiter, columns: true });
-        parser.on('data', data => {
+        parser.on('data', (data) => {
           if (!queryRegex || queryRegex.test(data.name)) {
             serializer.writeRow([
               experimentNames[experimentId],
@@ -87,8 +88,8 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
               data.httpRequests || '0',
               data.results,
               ...correctnessReference ?
-                [ correctnessReference.getCorrectness(experimentId, data.name, Number.parseInt(data.results, 10)) ] :
-                [],
+                  [ correctnessReference.getCorrectness(experimentId, data.name, Number.parseInt(data.results, 10)) ] :
+                  [],
             ]);
           }
         });
@@ -102,3 +103,4 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     // Close output CSV file
     serializer.close();
   }));
+}

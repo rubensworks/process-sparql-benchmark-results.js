@@ -15,8 +15,8 @@ import { TableSerializerMarkdown } from './TableSerializerMarkdown';
 
 export const command = 'wins <experiment-dir...>';
 export const desc = 'Show distribution of query wins from the given experiments in a table';
-export const builder = (yargs: Argv<any>): Argv<any> =>
-  yargs
+export function builder(yargs: Argv<any>): Argv<any> {
+  return yargs
     .options({
       queryRegex: {
         type: 'string',
@@ -58,18 +58,15 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         describe: 'Comma-separated list of row id\'s to mark (markdown-only)',
       },
     });
-export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => wrapVisualProgress('Collecting win data', async() => {
+}
+export function handler(argv: Record<string, any>): Promise<void> {
+  return wrapCommandHandler(argv, async(context: ITaskContext) => wrapVisualProgress('Collecting win data', async() => {
     // Load options
     const { experimentDirectories, experimentNames } = getExperimentNames(argv);
     const queryRegex = argv.queryRegex ? new RegExp(argv.queryRegex, 'u') : undefined;
     const correctnessReference = argv.correctnessReference ?
       constructCorrectnessChecker(argv.correctnessReference) :
       undefined;
-    const markRows: number[] = argv.markRows ?
-      argv.markRows.split(',').map((value: string) => Number.parseInt(value, 10)) :
-      [];
-
     // Prepare output CSV file
     const os = fs.createWriteStream(Path.join(context.cwd, `${argv.name}`));
     const serializer = argv.markdown ? new TableSerializerMarkdown(os) : new TableSerializerCsv(os);
@@ -83,7 +80,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       experimentIds.push(experimentId);
       times[experimentId] = {};
 
-      await handleCsvFile(experimentDirectory, argv, data => {
+      await handleCsvFile(experimentDirectory, argv, (data) => {
         if (!queryRegex || queryRegex.test(data.name)) {
           if (experimentId === 0) {
             queries.push(data.name);
@@ -129,7 +126,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     ], {
       align: [
         'left',
-        ...<'right'[]>experimentNames.map(value => 'right'),
+        ...<'right'[]>experimentNames.map(() => 'right'),
       ],
     });
     serializer.writeRow([
@@ -140,3 +137,4 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     // Close output CSV file
     serializer.close();
   }));
+}

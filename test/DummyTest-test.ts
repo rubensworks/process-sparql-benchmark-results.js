@@ -1,5 +1,3 @@
 describe('dummy', () => {
-  it('dummy', () => {
-    // Does nothing
-  });
+  it.todo('dummy');
 });

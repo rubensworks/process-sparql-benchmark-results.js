@@ -18,7 +18,7 @@ Most of these tools work on output produced by [jbr](https://github.com/rubenswo
 $ npm install -g @rubensworks/sparql-benchmark-runner
 ```
 
-or 
+or
 
 ```bash
 $ yarn global add @rubensworks/sparql-benchmark-runner
