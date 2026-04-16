@@ -10,8 +10,8 @@ import { getColorScheme, getExperimentNames, handleCsvFile, toSvg } from './TexU
 
 export const command = 'queryTimes <query> <experiment-dir...>';
 export const desc = 'Plot the query result arrival times from the given experiments';
-export const builder = (yargs: Argv<any>): Argv<any> =>
-  yargs
+export function builder(yargs: Argv<any>): Argv<any> {
+  return yargs
     .options({
       name: {
         type: 'string',
@@ -63,8 +63,9 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         default: false,
       },
     });
-export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
+}
+export function handler(argv: Record<string, any>): Promise<void> {
+  return wrapCommandHandler(argv, async(context: ITaskContext) => wrapVisualProgress('Plotting data', async() => {
     // Load CLI args
     let query: string = argv.query;
     let id = '0';
@@ -83,7 +84,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
     for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
       // Read CSV file
       let foundQuery = false;
-      await handleCsvFile(experimentDirectory, argv, data => {
+      await handleCsvFile(experimentDirectory, argv, (data) => {
         if (!foundQuery && data.name === query && (!id || data.id === id)) {
           foundQuery = true;
           const times: string[] = data.timestamps.split(/[ ,]/u);
@@ -130,7 +131,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         LEGEND_POS: argv.legendPos,
         ...argv.maxY ? { Y_MAX: `ymax=${argv.maxY},` } : {},
       },
-      contents => {
+      (contents) => {
         if (!argv.legend) {
           contents = contents.replace(/\\legend\{.*\}/ug, '');
         }
@@ -146,3 +147,4 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       await toSvg(argv, context);
     }
   }));
+}

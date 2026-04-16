@@ -10,8 +10,8 @@ import { TableSerializerCsv } from './TableSerializerCsv';
 
 export const command = 'bsbm <experiment-dir...>';
 export const desc = 'Convert BSBM output files to CSV';
-export const builder = (yargs: Argv<any>): Argv<any> =>
-  yargs
+export function builder(yargs: Argv<any>): Argv<any> {
+  return yargs
     .options({
       name: {
         type: 'string',
@@ -25,13 +25,14 @@ export const builder = (yargs: Argv<any>): Argv<any> =>
         default: 'bsbm.xml',
       },
     });
-export const handler = (argv: Record<string, any>): Promise<void> => wrapCommandHandler(argv,
-  async(context: ITaskContext) => wrapVisualProgress('Listing data', async() => {
+}
+export function handler(argv: Record<string, any>): Promise<void> {
+  return wrapCommandHandler(argv, async(_: ITaskContext) => wrapVisualProgress('Listing data', async() => {
     // Load options
     const { experimentDirectories } = getExperimentNames(argv);
 
     // Read XML files
-    for (const [ experimentId, experimentDirectory ] of experimentDirectories.entries()) {
+    for (const experimentDirectory of experimentDirectories) {
       // Prepare output CSV file
       const os = fs.createWriteStream(Path.join(experimentDirectory, `${argv.name}`));
       const serializer = new TableSerializerCsv(os);
@@ -48,7 +49,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
         const parser = new SaxesParser();
         let query: { name?: string; results?: number; time?: number } | undefined;
         let tagName: string;
-        parser.on('opentag', tag => {
+        parser.on('opentag', (tag) => {
           if (tag.name === 'query') {
             query = { name: tag.attributes.nr };
           }
@@ -56,7 +57,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             tagName = tag.name;
           }
         });
-        parser.on('text', text => {
+        parser.on('text', (text) => {
           if (query && text) {
             if (tagName === 'aqetg' && query.time === undefined) {
               query.time = Number.parseFloat(text) * 1_000;
@@ -65,7 +66,7 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
             }
           }
         });
-        parser.on('closetag', tag => {
+        parser.on('closetag', (tag) => {
           if (tag.name === 'query' && query) {
             serializer.writeRow([
               query.name!,
@@ -92,3 +93,4 @@ export const handler = (argv: Record<string, any>): Promise<void> => wrapCommand
       serializer.close();
     }
   }));
+}
