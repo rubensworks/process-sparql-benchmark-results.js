@@ -55,6 +55,11 @@
       "js"
     ],
     "collectCoverage": true,
+    "collectCoverageFrom": [
+      "lib/**/*.ts",
+      "index.ts",
+      "!**/*.d.ts"
+    ],
     "coveragePathIgnorePatterns": [
       "test"
     ]
