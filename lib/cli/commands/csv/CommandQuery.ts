@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import Path from 'path';
 
-import parse from 'csv-parse';
+import { parse } from 'csv-parse';
 import type { Argv } from 'yargs';
 
 import { constructCorrectnessChecker } from '../../../correctness/CorrectnessCheckerUtils';
@@ -80,7 +80,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
       const csvFile = Path.join(experimentDirectory, argv.inputName);
       await new Promise((resolve, reject) => {
         const parser = parse({ delimiter: argv.inputDelimiter, columns: true });
-        parser.on('data', (data) => {
+        parser.on('data', (data: Record<string, any>) => {
           if (!queryRegex || queryRegex.test(data.name)) {
             serializer.writeRow([
               experimentNames[experimentId],

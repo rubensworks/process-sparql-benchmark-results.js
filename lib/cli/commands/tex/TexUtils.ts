@@ -1,7 +1,7 @@
 import fs from 'fs';
 import Path from 'path';
 import * as spawn from 'cross-spawn';
-import parse from 'csv-parse';
+import { parse } from 'csv-parse';
 import { ErrorHandled } from '../../ErrorHandled';
 import type { ITaskContext } from '../../ITaskContext';
 
@@ -89,7 +89,12 @@ export async function handleCsvFile(
 ): Promise<void> {
   const csvFile = Path.join(experimentDirectory, argv.inputName);
   await new Promise((resolve, reject) => {
-    const parser = parse({ delimiter: argv.inputDelimiter, columns: true, relax: true, relax_column_count: true });
+    const parser = parse({
+      delimiter: argv.inputDelimiter,
+      columns: true,
+      relax_quotes: true,
+      relax_column_count: true,
+    });
     parser.on('data', handler);
     parser.on('error', reject);
     parser.on('end', resolve);
