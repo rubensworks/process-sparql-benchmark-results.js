@@ -73,7 +73,7 @@
     "csv-parse": "^4.16.0",
     "ora": "^5.4.1",
     "winston": "^3.3.3",
-    "yargs": "^16.2.0"
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@rubensworks/eslint-config": "^3",
