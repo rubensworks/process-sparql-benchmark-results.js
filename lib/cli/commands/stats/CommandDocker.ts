@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import Path from 'path';
 
-import parse from 'csv-parse';
+import { parse } from 'csv-parse';
 import type { Argv } from 'yargs';
 
 import { wrapCommandHandler } from '../../CliHelpers';
