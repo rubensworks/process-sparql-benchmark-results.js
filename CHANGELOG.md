@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.4.0"></a>
+## [v1.4.0](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.5...v1.4.0) - 2026-09-26
+
+### Added
+* [Add ghbench option to report failed query instantiations (#51)](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/f1ac5488684a22a08e2f51413728744a9af8e4ca)
+
+### Changed
+* [Omit queries that failed for all instantiations in ghbench (#49)](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/0d6f684b7a48fb462aa0e70030342bf2f947eaf2)
+
+### Fixed
+* [Fix CLI doing nothing, and tex commands missing fs-extra (#50)](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/d4d612b384c88085229d2cf54b9402a8468b8d6b)
+
 <a name="v1.3.5"></a>
 ## [v1.3.5](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.4...v1.3.5) - 2026-03-04
 
