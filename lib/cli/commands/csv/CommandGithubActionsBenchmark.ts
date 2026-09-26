@@ -91,7 +91,12 @@ export function handler(argv: Record<string, any>): Promise<void> {
         // Calculate averages
         let total = 0;
         for (const entry of Object.values(ghbenchDataRaw)) {
-          const value = calcMedian(entry.values.filter((val, index) => entry.extra.error[index] !== 'true')) || 0;
+          const successValues = entry.values.filter((val, index) => entry.extra.error[index] !== 'true');
+          // Queries that failed for all instantiations have no time, so they must not be reported as 0
+          if (successValues.length === 0) {
+            continue;
+          }
+          const value = calcMedian(successValues);
           if (!Number.isNaN(value)) {
             total += value;
           }
