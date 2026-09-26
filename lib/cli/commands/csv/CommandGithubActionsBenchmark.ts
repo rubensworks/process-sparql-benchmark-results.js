@@ -50,6 +50,11 @@ export function builder(yargs: Argv<any>): Argv<any> {
         describe: 'If separate execution time for each query in the experiment must be reported',
         default: true,
       },
+      failures: {
+        type: 'boolean',
+        describe: 'If the number of failed query instantiations in the experiment must be reported',
+        default: false,
+      },
     });
 }
 export function handler(argv: Record<string, any>): Promise<void> {
@@ -118,6 +123,25 @@ export function handler(argv: Record<string, any>): Promise<void> {
             name: `${experimentNames[experimentId]}`,
             unit: 'ms',
             value: total,
+          });
+        }
+
+        // Output failures, as failed queries have no time to report
+        if (argv.failures) {
+          const failedQueries = Object.entries(ghbenchDataRaw)
+            .map(([ name, entry ]) => ({
+              name,
+              failed: entry.extra.error.filter(error => error === 'true').length,
+              count: entry.extra.error.length,
+            }))
+            .filter(entry => entry.failed > 0);
+          ghbenchData.push({
+            name: `${experimentNames[experimentId]} - failed queries`,
+            unit: 'failed instantiations',
+            value: failedQueries.reduce((sum, entry) => sum + entry.failed, 0),
+            extra: failedQueries.length > 0 ?
+              failedQueries.map(entry => `${entry.name}: ${entry.failed}/${entry.count} failed`).join('; ') :
+              'None',
           });
         }
       }
