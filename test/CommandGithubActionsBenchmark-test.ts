@@ -54,6 +54,26 @@ describe('CommandGithubActionsBenchmark', () => {
     ]);
   });
 
+  it('reports failed query instantiations', async() => {
+    const output = await run(rows, { detailed: false, failures: true });
+    expect(output).toEqual([{
+      name: 'E - failed queries',
+      unit: 'failed instantiations',
+      value: 3,
+      extra: 'partial: 1/2 failed; failed: 2/2 failed',
+    }]);
+  });
+
+  it('reports no failed query instantiations', async() => {
+    const output = await run([ 'ok;0;false;1;0;100' ], { detailed: false, failures: true });
+    expect(output).toEqual([{ name: 'E - failed queries', unit: 'failed instantiations', value: 0, extra: 'None' }]);
+  });
+
+  it('does not report failures by default', async() => {
+    const output = await run(rows, { detailed: false });
+    expect(output).toEqual([]);
+  });
+
   it('excludes failed queries from the total', async() => {
     const output = await run(rows, { total: true, detailed: false });
     expect(output).toEqual([{ name: 'E', unit: 'ms', value: 350 }]);
