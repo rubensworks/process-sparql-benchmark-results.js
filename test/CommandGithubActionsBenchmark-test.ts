@@ -74,6 +74,14 @@ describe('CommandGithubActionsBenchmark', () => {
     expect(output).toEqual([]);
   });
 
+  it('keeps fractional times', async() => {
+    const output = await run([ 'fast;0;false;1;0;1.5', 'fast;1;false;1;0;2.75' ], { total: true });
+    expect(output.map(entry => [ entry.name, entry.value ])).toEqual([
+      [ 'E - fast', 2.75 ],
+      [ 'E', 2.75 ],
+    ]);
+  });
+
   it('excludes failed queries from the total', async() => {
     const output = await run(rows, { total: true, detailed: false });
     expect(output).toEqual([{ name: 'E', unit: 'ms', value: 350 }]);

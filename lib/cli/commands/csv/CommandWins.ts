@@ -86,7 +86,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
             queries.push(data.name);
           }
 
-          times[experimentId][data.name] = Number.parseInt(data.time, 10);
+          times[experimentId][data.name] = Number.parseFloat(data.time);
           results[data.name] = Number.parseInt(data.results, 10);
         }
       });

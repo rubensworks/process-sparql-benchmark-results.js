@@ -129,7 +129,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
             totals[data.name] = [];
           }
 
-          let value = Number.parseInt(data[metric] || '0', 10);
+          let value = Number.parseFloat(data[metric] || '0');
           value = Math.max(argv.zeroReplacement, value);
 
           totals[data.name].push(value);
@@ -138,7 +138,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
             if (!(data.name in totalsFirst)) {
               totalsFirst[data.name] = [];
             }
-            totalsFirst[data.name].push(Number.parseInt(data.timestamps.split(' ')[0], 10));
+            totalsFirst[data.name].push(Number.parseFloat(data.timestamps.split(' ')[0]));
           }
         }
       });
