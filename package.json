@@ -1,6 +1,6 @@
 {
   "name": "@rubensworks/process-sparql-benchmark-results",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Personal tools to post-process query results from SPARQL benchmarks",
   "license": "MIT",
   "homepage": "https://github.com/rubensworks/process-sparql-benchmark-results.js#readme",
@@ -37,7 +37,7 @@
     "test": "jest ${1}",
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "lint": "eslint . --cache",
-    "prepare": "npm run build",
+    "prepare": "husky && npm run build",
     "version": "manual-git-changelog onversion"
   },
   "jest": {
@@ -89,10 +89,5 @@
     "streamify-array": "^2.0.0",
     "ts-jest": "^29.0.0",
     "typescript": "^5.0.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run build && npm run lint && npm run test"
-    }
   }
 }

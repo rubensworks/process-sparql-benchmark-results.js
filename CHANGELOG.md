@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.4.1"></a>
+## [v1.4.1](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.4.0...v1.4.1) - 2026-11-07
+
+### Fixed
+* [Fix fractional query times being truncated (#52)](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/d8cdf96d3e9fef9bcede26ebb4dd198e63f20564)
+
 <a name="v1.4.0"></a>
 ## [v1.4.0](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.3.5...v1.4.0) - 2026-09-26
 
