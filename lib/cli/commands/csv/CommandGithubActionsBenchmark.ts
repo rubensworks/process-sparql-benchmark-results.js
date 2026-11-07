@@ -72,7 +72,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
 
         await handleCsvFile(experimentDirectory, argv, (data) => {
           if (!queryRegex || queryRegex.test(data.name)) {
-            const value = Number.parseInt(data.time, 10);
+            const value = Number.parseFloat(data.time);
             if (!ghbenchDataRaw[data.name]) {
               ghbenchDataRaw[data.name] = {
                 name: `${experimentNames[experimentId]} - ${data.name}`,

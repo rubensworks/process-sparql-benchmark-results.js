@@ -145,7 +145,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
           if (!(data.name in timesTotal)) {
             timesTotal[data.name] = [];
           }
-          timesTotal[data.name].push(Number.parseInt(data.time, 10));
+          timesTotal[data.name].push(Number.parseFloat(data.time));
 
           if (!(data.name in requestsTotal)) {
             requestsTotal[data.name] = [];
@@ -160,7 +160,7 @@ export function handler(argv: Record<string, any>): Promise<void> {
             if (!(data.name in timesFirstTotal)) {
               timesFirstTotal[data.name] = [];
             }
-            timesFirstTotal[data.name].push(Number.parseInt(data.timestamps.split(' ')[0], 10));
+            timesFirstTotal[data.name].push(Number.parseFloat(data.timestamps.split(' ')[0]));
           }
         }
       });
