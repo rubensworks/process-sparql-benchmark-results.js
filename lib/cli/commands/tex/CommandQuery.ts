@@ -128,6 +128,10 @@ export function handler(argv: Record<string, any>): Promise<void> {
           if (!(data.name in totals)) {
             totals[data.name] = [];
           }
+          // Failed queries have no execution time, so they are left out instead of counting as zero.
+          if (data.error === 'true') {
+            return;
+          }
 
           let value = Number.parseFloat(data[metric] || '0');
           value = Math.max(argv.zeroReplacement, value);
@@ -148,6 +152,13 @@ export function handler(argv: Record<string, any>): Promise<void> {
       const averageMinus: Record<string, number> = {};
       const averagePlus: Record<string, number> = {};
       for (const [ query, times ] of Object.entries(totals)) {
+        // Without successful executions, there is nothing to plot for this query.
+        if (times.length === 0) {
+          averages[query] = Number.NaN;
+          averageMinus[query] = Number.NaN;
+          averagePlus[query] = Number.NaN;
+          continue;
+        }
         const average = times.reduce((sum, current) => sum + current) / times.length;
         averages[query] = average;
         averageMinus[query] = average - times.reduce((minV, value) => Math.min(value, minV));
