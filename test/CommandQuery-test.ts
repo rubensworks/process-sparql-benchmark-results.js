@@ -68,4 +68,12 @@ describe('CommandQuery', () => {
     expect(output.ok).toEqual([ 100, 0, 0 ]);
     expect(output.failed).toEqual([ Number.NaN, Number.NaN, Number.NaN ]);
   });
+
+  it('labels every query on the x axis, also those without values', async() => {
+    await plot([
+      'failed;0;true;0;0;0',
+      'ok;0;false;1;0;100',
+    ]);
+    expect(fs.readFileSync(Path.join(cwd, 'plot.tex'), 'utf8')).toContain('xtick={failed,ok},');
+  });
 });
