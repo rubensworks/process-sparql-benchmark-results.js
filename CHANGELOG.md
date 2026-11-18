@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+<a name="v1.4.2"></a>
+## [v1.4.2](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.4.1...v1.4.2) - 2026-11-18
+
+### Fixed
+* [Leave failed queries out of query plots (#54)](https://github.com/rubensworks/process-sparql-benchmark-results.js/commit/212e73b413b470d8f00e98718b345e814098b970)
+
 <a name="v1.4.1"></a>
 ## [v1.4.1](https://github.com/rubensworks/process-sparql-benchmark-results.js/compare/v1.4.0...v1.4.1) - 2026-11-07
 
