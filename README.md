@@ -248,6 +248,39 @@ Options:
       --inputDelimiter  Delimiter for the input CSV file [string] [default: ";"]
 ```
 
+#### 2.2.2. Convert BSBM output files
+
+By invoking `psbr csv bsbm` with any number of experiment directories,
+the [BSBM](http://wbsg.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/) output file `bsbm.xml` within each experiment directory
+is converted into a `query-times.csv` file within that directory,
+with the geometric mean execution time and the average number of results of each query.
+
+By default, queries are named after their number in the BSBM output file.
+For the [Explore and Update use case](http://wbsg.informatik.uni-mannheim.de/bizer/berlinsparqlbenchmark/spec/ExploreAndUpdateUseCase/index.html),
+the BSBM test driver numbers the two update queries first, and the explore queries after them.
+With `--useCase exploreAndUpdate`, the update queries are therefore named `U1` and `U2`,
+and the explore queries keep their own numbers, as in the Explore use case.
+
+**Full usage**:
+
+```text
+psbr csv bsbm <experiment-dir...>
+
+Convert BSBM output files to CSV
+
+Options:
+      --version    Show version number                                 [boolean]
+      --cwd        The current working directory           [string] [default: .]
+  -v, --verbose    If more logging output should be generated          [boolean]
+      --help       Show help                                           [boolean]
+  -n, --name       Custom output file name [string] [default: "query-times.csv"]
+      --inputName  Custom input file name per experiment
+                                                  [string] [default: "bsbm.xml"]
+      --useCase    The BSBM use case of the experiments, which determines the
+                   query names
+          [string] [choices: "explore", "exploreAndUpdate"] [default: "explore"]
+```
+
 ### 2.3. Derive statistics
 
 Subcommands of `psbr stats` can derive statistics.
